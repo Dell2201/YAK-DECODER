@@ -14,3 +14,5 @@
 .batch-policy{color:#7c3aed;background:#f3efff;border:1px solid #d9cafa;border-left:4px solid #7c3aed;border-radius:7px;padding:12px 15px;font-weight:600}
 
 .batch-policy.signature-disabled{color:#b42318;background:#fff1f0;border-color:#fecdca;border-left-color:#d92d20}
+
+.batch-actions .batch-danger{background:#d92d20;border-color:#d92d20;color:#fff}.batch-actions .batch-danger:hover:not(:disabled){background:#b42318;border-color:#b42318}
