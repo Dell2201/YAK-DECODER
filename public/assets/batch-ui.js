@@ -121,6 +121,7 @@
     if (active || singleBusy || !entries.length) return;
     clearResult();
     controller = new AbortController();
+    const startedAt = performance.now();
     const options = {requireYakSignature: signature.checked, signal: controller.signal};
     setBusy(true);
     table.hidden = false;
@@ -142,7 +143,31 @@
       download.download = core.archiveName(entries);
       const count = state => files.filter(file => file.status === state).length;
       const errors = count('error'), warnings = count('partial') + count('warning');
-      summary.textContent = `Декодировано: ${count('decoded')} · частично: ${count('partial')} · без изменений: ${count('kept') + count('warning') + errors} · ошибок: ${errors} · ZIP: ${(blob.size / 1048576).toFixed(2)} МБ`;
+      const statistics = [
+        ['Всего файлов', files.filter(file => !file.directory).length],
+        ['Папок сохранено', count('directory')],
+        ['Декодировано', count('decoded')],
+        ['Частично декодировано', count('partial')],
+        ['Без изменений', count('kept')],
+        ['Исходник с предупреждением', count('warning')],
+        ['Ошибок · сохранён исходник', errors],
+        ['Время обработки', ((performance.now() - startedAt) / 1000).toFixed(1) + ' с'],
+        ['Размер ZIP', (blob.size / 1048576).toFixed(2) + ' МБ']
+      ];
+      summary.replaceChildren();
+      const heading = document.createElement('h3');
+      heading.textContent = 'Статистика обработки';
+      summary.appendChild(heading);
+      for (const [label, value] of statistics) {
+        const card = document.createElement('div');
+        card.className = 'batch-stat';
+        const number = document.createElement('strong');
+        number.textContent = String(value);
+        const caption = document.createElement('span');
+        caption.textContent = label;
+        card.append(number, caption);
+        summary.appendChild(card);
+      }
       result.hidden = false;
       progress.value = progress.max;
       setStatus(errors || warnings ? 'ZIP собран с предупреждениями. Проверьте таблицу результатов; ошибочные файлы сохранены в исходном виде.' : 'Готово. Структура папки сохранена, ZIP отправлен на скачивание.', errors || warnings ? 'warning' : 'success');

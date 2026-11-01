@@ -6,10 +6,10 @@
   <meta name="description" content="Декодирование PHP-кода, запутанного YAK Pro.">
   <title>YAK Decode — читаемый PHP</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d493d'/%3E%3Cpath d='M16 17l16 18 16-18M32 35v14' fill='none' stroke='%23f1f6e9' stroke-width='6'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=3">
+  <link rel="stylesheet" href="assets/styles.css?v=4">
   <script src="assets/app.js?v=4" defer></script>
   <script src="assets/batch-core.js?v=3" defer></script>
-  <script src="assets/batch-ui.js?v=3" defer></script>
+  <script src="assets/batch-ui.js?v=4" defer></script>
 </head>
 <body>
   <div class="page">
@@ -36,7 +36,7 @@
           <input type="checkbox" id="require-yak-signature" aria-describedby="signature-hint">
           <span>Обрабатывать только код с подписью YAK Pro</span>
         </label>
-        <span class="signature-hint" id="signature-hint">Проверять вхождение «Obfuscated by YAK Pro - Php Obfuscator»</span>
+        <span class="signature-hint" id="signature-hint">Проверяет вхождение «Obfuscated by YAK Pro - Php Obfuscator»</span>
       </div>
 
       <section class="workspace" aria-label="Редактор кода">
@@ -91,7 +91,7 @@
         </div>
         <progress id="batch-progress" value="0" max="1" aria-label="Прогресс обработки папки"></progress>
         <p class="batch-status" id="batch-status" role="status" aria-live="polite">Перетащите папку, чтобы начать.</p>
-        <div class="batch-result" id="batch-result" hidden><a id="batch-download" class="copy-button" download>Скачать ZIP ещё раз</a><span id="batch-summary"></span></div>
+        <div class="batch-result" id="batch-result" hidden><a id="batch-download" class="copy-button" download>Скачать ZIP ещё раз</a><section id="batch-summary" class="batch-statistics" aria-label="Статистика обработки"></section></div>
         <div class="batch-log" id="batch-log" hidden><table><thead><tr><th scope="col">Файл</th><th scope="col">Результат</th><th scope="col">Комментарий</th></tr></thead><tbody id="batch-log-body"></tbody></table></div>
         <p class="batch-footnote">Каждый обработанный PHP-файл проходит проверку синтаксиса. При ошибке сохраняется исходник; подробности появятся в таблице.</p>
       </section>
