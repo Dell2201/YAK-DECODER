@@ -42,6 +42,7 @@
     progress.value = 0;
   }
   function updatePolicy() {
+    policy.classList.toggle('signature-disabled', !signature.checked);
     policy.textContent = signature.checked ? 'Флажок выше включён: обрабатывать только PHP с подписью YAK Pro.' : 'Флажок выше выключен: обрабатывать все PHP-файлы.';
   }
   function setEntries(list) {
