@@ -10,3 +10,5 @@
 
 /* SiteUpgrade-inspired cool neutrals and turquoise accents. */
 .eyebrow,.title-dot,.file-icon,.batch-badge{color:#008f86}.eyebrow>span,.dot{background:#00a99d}.intro-symbol{background:linear-gradient(135deg,#e6f7f5,#f6f8fb);border-color:#cceeea;color:#80cec7}.symbol-line{background:#00a99d}.header-tag,.language{background:#e6f7f5;border-color:#cceeea;color:#008f86}.batch-dropzone{background:#f0faf9;border-color:#9fdcd6}.batch-dropzone.dragging{background:#dff5f2;border-color:#00a99d}.batch-dropzone strong{color:#344054}.batch-statistics h3,.batch-stat strong{color:#008f86}.batch-stat{background:#f0faf9;border-color:#cceeea}.signature-option input{accent-color:#00a99d}.brand-symbol{background:#00a99d;color:#fff}.primary-button{color:#fff}.batch-policy{color:#344054}
+
+.batch-policy{color:#7c3aed;background:#f3efff;border:1px solid #d9cafa;border-left:4px solid #7c3aed;border-radius:7px;padding:12px 15px;font-weight:600}

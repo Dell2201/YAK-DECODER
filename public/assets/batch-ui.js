@@ -115,6 +115,7 @@
       row.appendChild(cell);
     }
     rows.appendChild(row);
+    table.scrollTop = table.scrollHeight;
   }
 
   start.addEventListener('click', async () => {
