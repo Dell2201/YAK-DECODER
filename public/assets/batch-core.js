@@ -165,8 +165,34 @@
     return (c ^ 0xffffffff) >>> 0;
   }
 
+  function reportEntry(results) {
+    const sections = [
+      ['partial', 'Остались переходы goto — файл обработан частично'],
+      ['warning', 'Не обработано — сохранён исходный файл'],
+      ['error', 'Ошибка обработки — сохранён исходный файл']
+    ];
+    if (!results.some(file => sections.some(([status]) => file.status === status))) return null;
+    const used = new Set(results.map(file => file.path.replace(/\/$/, '').toLowerCase()));
+    let name = 'yak-decoder-report.txt', suffix = 2;
+    while (used.has(name.toLowerCase())) name = `yak-decoder-report-${suffix++}.txt`;
+    const lines = ['ОТЧЁТ О ПАКЕТНОМ ДЕКОДИРОВАНИИ', ''];
+    for (const [status, title] of sections) {
+      const items = results.filter(file => file.status === status);
+      lines.push(`${title}: ${items.length}`, '');
+      if (!items.length) lines.push('Нет файлов.');
+      for (const file of items) {
+        lines.push(file.path);
+        if (file.message) lines.push(`  ${file.message.replace(/[\r\n]+/g, ' ')}`);
+      }
+      lines.push('');
+    }
+    return {path: name, data: encoder.encode('\ufeff' + lines.join('\r\n')), mtime: Date.now()};
+  }
+
   // ZIP STORE: exact bytes, UTF-8 names, directory records, no external libraries.
   function buildZip(results) {
+    const report = reportEntry(results);
+    if (report) results = [...results, report];
     const local = [], central = [], names = new Set();
     let offset = 0, centralSize = 0;
     if (results.length > LIMITS.entries) throw new Error('Слишком много записей ZIP.');
