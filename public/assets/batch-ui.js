@@ -1,8 +1,6 @@
 (() => {
   'use strict';
   const core = window.YakBatch;
-  const choose = document.getElementById('batch-choose');
-  const input = document.getElementById('batch-folder');
   const zone = document.getElementById('batch-dropzone');
   const start = document.getElementById('batch-decode');
   const reset = document.getElementById('batch-reset');
@@ -24,7 +22,6 @@
     status.className = 'batch-status' + (type ? ' ' + type : '');
   }
   function updateControls() {
-    choose.disabled = active || singleBusy;
     start.disabled = active || singleBusy || !entries.length;
     reset.disabled = active || singleBusy || !entries.length;
     cancel.hidden = !active;
@@ -67,12 +64,6 @@
     finally { controller = null; setBusy(false); }
   }
 
-  choose.addEventListener('click', () => {
-    if (active || singleBusy) return;
-    input.value = '';
-    input.click();
-  });
-  input.addEventListener('change', () => scan(() => core.collectFiles(input.files)));
   zone.addEventListener('dragover', event => {
     if (![...event.dataTransfer.types].includes('Files')) return;
     event.preventDefault();
@@ -85,7 +76,7 @@
     // collectDrop captures FileSystemEntry objects synchronously before its first await.
     scan(signal => core.collectDrop(event.dataTransfer, signal));
   });
-  reset.addEventListener('click', () => { input.value = ''; setEntries([]); });
+  reset.addEventListener('click', () => setEntries([]));
   cancel.addEventListener('click', () => { if (controller) controller.abort(); });
   signature.addEventListener('change', () => { updatePolicy(); clearResult(); if (entries.length) setStatus('Настройка изменена. Можно запустить обработку папки.'); });
   document.addEventListener('yak:single-busy', event => { singleBusy = !!event.detail; updateControls(); });

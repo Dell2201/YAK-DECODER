@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="assets/styles.css?v=3">
   <script src="assets/app.js?v=4" defer></script>
   <script src="assets/batch-core.js?v=3" defer></script>
-  <script src="assets/batch-ui.js?v=2" defer></script>
+  <script src="assets/batch-ui.js?v=3" defer></script>
 </head>
 <body>
   <div class="page">
@@ -76,16 +76,13 @@
 
       <section class="batch" aria-labelledby="batch-title">
         <div class="batch-heading"><div><p class="eyebrow"><span></span> МОДУЛЬ ЦЕЛИКОМ</p><h2 id="batch-title">Пакетное декодирование папки</h2></div><span class="batch-badge">FOLDER → ZIP</span></div>
-        <p class="batch-description">Выберите папку модуля OpenCart или перетащите её ниже. PHP-файлы будут обработаны рекурсивно, остальные файлы попадут в ZIP без изменений. Названия и вложенность папок сохраняются.</p>
+        <p class="batch-description">Перетащите папку модуля OpenCart в область ниже. PHP-файлы будут обработаны рекурсивно, остальные файлы попадут в ZIP без изменений. Названия и вложенность папок сохраняются.</p>
         <p class="batch-policy" id="batch-policy">Используется флажок «Обрабатывать только код с подписью YAK Pro» над редактором.</p>
         <div class="batch-dropzone" id="batch-dropzone" aria-label="Зона перетаскивания папки">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a1 1 0 011-1h5l2 3h9a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/><path d="M8 13h8M12 9v8"/></svg>
           <strong>Перетащите сюда папку модуля</strong>
-          <span>или</span>
-          <button type="button" class="copy-button" id="batch-choose">Выбрать папку</button>
           <small>До 100 МБ · до 5000 файлов · исходники остаются на месте</small>
         </div>
-        <input type="file" id="batch-folder" webkitdirectory directory multiple hidden>
         <p class="batch-selection" id="batch-selection" aria-live="polite">Папка не выбрана</p>
         <div class="batch-actions">
           <button type="button" class="primary-button" id="batch-decode" disabled><span>Декодировать и скачать zip</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 16v4h16v-4"/></svg></button>
@@ -93,10 +90,10 @@
           <button type="button" class="text-button" id="batch-cancel" hidden>Остановить</button>
         </div>
         <progress id="batch-progress" value="0" max="1" aria-label="Прогресс обработки папки"></progress>
-        <p class="batch-status" id="batch-status" role="status" aria-live="polite">Выберите папку, чтобы начать.</p>
+        <p class="batch-status" id="batch-status" role="status" aria-live="polite">Перетащите папку, чтобы начать.</p>
         <div class="batch-result" id="batch-result" hidden><a id="batch-download" class="copy-button" download>Скачать ZIP ещё раз</a><span id="batch-summary"></span></div>
         <div class="batch-log" id="batch-log" hidden><table><thead><tr><th scope="col">Файл</th><th scope="col">Результат</th><th scope="col">Комментарий</th></tr></thead><tbody id="batch-log-body"></tbody></table></div>
-        <p class="batch-footnote">Каждый обработанный PHP-файл проходит проверку синтаксиса. При ошибке сохраняется исходник; подробности появятся в таблице. Для сохранения пустых папок используйте перетаскивание.</p>
+        <p class="batch-footnote">Каждый обработанный PHP-файл проходит проверку синтаксиса. При ошибке сохраняется исходник; подробности появятся в таблице.</p>
       </section>
     </main>
 
