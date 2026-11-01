@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Декодирование PHP-кода, запутанного YAK Pro.">
+  <title>YAK Decode — читаемый PHP</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d493d'/%3E%3Cpath d='M16 17l16 18 16-18M32 35v14' fill='none' stroke='%23f1f6e9' stroke-width='6'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/styles.css?v=3">
+  <script src="assets/app.js?v=4" defer></script>
+  <script src="assets/batch-core.js?v=3" defer></script>
+  <script src="assets/batch-ui.js?v=2" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <a class="brand" href="./" aria-label="YAK Decode — главная">
+        <span class="brand-symbol" aria-hidden="true">Y<span>↗</span></span>
+        <span>YAK<span class="brand-light"> / DECODE</span></span>
+      </a>
+      <span class="header-tag"><span class="dot"></span> PHP → PHP</span>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow"><span></span> ЧИТАЕМЫЙ КОД. МЕНЬШЕ ШУМА.</p>
+          <h1 id="page-title">Разберитесь в коде<span class="title-dot">.</span></h1>
+          <p class="description">Вставьте PHP-код, запутанный YAK Pro.<br>Один клик — и результат появится в том же поле.</p>
+        </div>
+        <div class="intro-symbol" aria-hidden="true"><span>{</span><span class="symbol-line"></span><span>}</span></div>
+      </section>
+
+      <div class="processing-options">
+        <label class="signature-option" for="require-yak-signature">
+          <input type="checkbox" id="require-yak-signature" aria-describedby="signature-hint">
+          <span>Обрабатывать только код с подписью YAK Pro</span>
+        </label>
+        <span class="signature-hint" id="signature-hint">Проверять вхождение «Obfuscated by YAK Pro - Php Obfuscator»</span>
+      </div>
+
+      <section class="workspace" aria-label="Редактор кода">
+        <div class="editor-toolbar">
+          <div class="editor-heading"><span class="file-icon" aria-hidden="true">&lt;/&gt;</span><span id="editor-mode">Исходный код</span><span class="language">PHP</span></div>
+          <div class="editor-actions">
+            <button type="button" class="text-button" id="example-button">Вставить пример</button>
+            <span class="toolbar-divider"></span>
+            <button type="button" class="icon-button" id="clear-button" aria-label="Очистить поле" title="Очистить поле"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button>
+          </div>
+        </div>
+        <div class="editor" id="editor-wrap">
+          <div class="line-gutter" aria-hidden="true"><div id="line-numbers">1</div></div>
+          <label class="sr-only" for="code">PHP-код для декодирования</label>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" placeholder="&lt;?php&#10;&#10;// Вставьте ваш код сюда…&#10;goto a1b2c;&#10;" aria-describedby="status input-hint"></textarea>
+          <span class="editor-watermark" aria-hidden="true">PHP</span>
+        </div>
+        <div class="editor-footer">
+          <span id="code-metrics">Строк: 0 · 0 Б</span>
+          <span id="input-hint">UTF-8 <span class="footer-divider">/</span> до 2 МБ</span>
+        </div>
+      </section>
+
+      <div class="action-row">
+        <div class="main-actions">
+          <button type="button" class="primary-button" id="decode-button"><span class="button-spinner" aria-hidden="true"></span><span id="decode-label">Декодировать</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <span class="keyboard-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+        </div>
+        <div class="result-actions">
+          <button type="button" class="text-button" id="restore-button" hidden>Вернуть исходник</button>
+          <button type="button" class="copy-button" id="copy-button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg><span>Копировать код</span></button>
+        </div>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"><span class="status-indicator"></span><span id="status-text">Готов к работе. Вставьте код или попробуйте пример.</span></div>
+      <div class="notes"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v5c0 5-8 10-8 10S4 16 4 11V6l8-3z"/><path d="M8 12l3 3 5-6"/></svg>Код не отправляется сторонним сервисам.</span><span>Без регистрации и лишних шагов.</span></div>
+
+      <section class="batch" aria-labelledby="batch-title">
+        <div class="batch-heading"><div><p class="eyebrow"><span></span> МОДУЛЬ ЦЕЛИКОМ</p><h2 id="batch-title">Пакетное декодирование папки</h2></div><span class="batch-badge">FOLDER → ZIP</span></div>
+        <p class="batch-description">Выберите папку модуля OpenCart или перетащите её ниже. PHP-файлы будут обработаны рекурсивно, остальные файлы попадут в ZIP без изменений. Названия и вложенность папок сохраняются.</p>
+        <p class="batch-policy" id="batch-policy">Используется флажок «Обрабатывать только код с подписью YAK Pro» над редактором.</p>
+        <div class="batch-dropzone" id="batch-dropzone" aria-label="Зона перетаскивания папки">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a1 1 0 011-1h5l2 3h9a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/><path d="M8 13h8M12 9v8"/></svg>
+          <strong>Перетащите сюда папку модуля</strong>
+          <span>или</span>
+          <button type="button" class="copy-button" id="batch-choose">Выбрать папку</button>
+          <small>До 100 МБ · до 5000 файлов · исходники остаются на месте</small>
+        </div>
+        <input type="file" id="batch-folder" webkitdirectory directory multiple hidden>
+        <p class="batch-selection" id="batch-selection" aria-live="polite">Папка не выбрана</p>
+        <div class="batch-actions">
+          <button type="button" class="primary-button" id="batch-decode" disabled><span>Декодировать и скачать zip</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 16v4h16v-4"/></svg></button>
+          <button type="button" class="text-button" id="batch-reset" disabled>Сбросить</button>
+          <button type="button" class="text-button" id="batch-cancel" hidden>Остановить</button>
+        </div>
+        <progress id="batch-progress" value="0" max="1" aria-label="Прогресс обработки папки"></progress>
+        <p class="batch-status" id="batch-status" role="status" aria-live="polite">Выберите папку, чтобы начать.</p>
+        <div class="batch-result" id="batch-result" hidden><a id="batch-download" class="copy-button" download>Скачать ZIP ещё раз</a><span id="batch-summary"></span></div>
+        <div class="batch-log" id="batch-log" hidden><table><thead><tr><th scope="col">Файл</th><th scope="col">Результат</th><th scope="col">Комментарий</th></tr></thead><tbody id="batch-log-body"></tbody></table></div>
+        <p class="batch-footnote">Каждый обработанный PHP-файл проходит проверку синтаксиса. При ошибке сохраняется исходник; подробности появятся в таблице. Для сохранения пустых папок используйте перетаскивание.</p>
+      </section>
+    </main>
+
+    <footer class="page-footer"><span>YAK DECODE</span><span>Из запутанного PHP — в понятную структуру.</span><span>01 / PHP TOOLS</span></footer>
+  </div>
+</body>
+</html>

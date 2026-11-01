@@ -1,0 +1,24 @@
+Встроенный PHP для YAK Decode
+
+PHP 7.4.33 NTS, Windows x64, VC15.
+Сайт запускается через runtime/php/php.exe. Декодирование и --syntax-check
+выполняются тем же файлом. Установка PHP и настройка PATH не требуются.
+Все процессы запускаются с -n: системные php.ini не загружаются.
+JSON и tokenizer встроены в PHP; дополнительные PHP-расширения не нужны.
+
+Официальный архив PHP:
+https://downloads.php.net/~windows/releases/archives/php-7.4.33-nts-Win32-vc15-x64.zip
+SHA-256 архива:
+14ae3250d4447c8ccfc4c45a70d90adfbcd61e728d85f0be56a7ddf8f9c8aace
+
+В папку php/ также включены app-local библиотеки Visual C++ x64.
+Они извлечены из официального подписанного пакета Microsoft:
+https://aka.ms/vs/17/release/vc_redist.x64.exe
+Системная установка этих библиотек для данного комплекта не выполнялась.
+Лицензии Microsoft сохранены в php/MICROSOFT-VC-LICENSE.*.rtf.
+Данные загрузок и хеши локальных библиотек: manifest.json.
+
+Проверено на Windows x64. Поддержка Windows x86, ARM64 и старых выпусков
+Windows этим комплектом не проверялась. PHP 7.4 больше не поддерживается
+разработчиками; эта версия оставлена для совместимости с декодируемым PHP.
+start.cmd запускает сайт только на 127.0.0.1.
