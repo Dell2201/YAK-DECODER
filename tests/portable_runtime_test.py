@@ -40,7 +40,6 @@ def main():
     with tempfile.TemporaryFile() as log:
         server = subprocess.Popen([
             str(PHP), '-n', '-d', 'display_errors=0', '-d', 'memory_limit=256M',
-            '-d', 'post_max_size=32M',
             '-S', f'127.0.0.1:{port}', '-t', str(ROOT / 'public')
         ], env=environment, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=log,
             creationflags=subprocess.CREATE_NO_WINDOW)

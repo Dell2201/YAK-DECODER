@@ -15,9 +15,9 @@ function countGotos(string $code): int
 }
 
 try {
-    $code = stream_get_contents(STDIN, 5242881);
-    if ($code === false || strlen($code) > 5242880) {
-        throw new RuntimeException('Код слишком большой. Допустимый размер — 5 МБ.');
+    $code = stream_get_contents(STDIN, 2097153);
+    if ($code === false || strlen($code) > 2097152) {
+        throw new RuntimeException('Код слишком большой. Допустимый размер — 2 МБ.');
     }
     if (substr($code, 0, 3) === "\xEF\xBB\xBF") {
         $code = substr($code, 3);

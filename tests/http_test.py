@@ -6,7 +6,7 @@ import tempfile
 import urllib.error
 import urllib.request
 
-BASE = sys.argv[1].rstrip('/') + '/' if len(sys.argv) > 1 else 'http://127.0.0.1:18090/'
+BASE = sys.argv[1].rstrip('/') + '/' if len(sys.argv) > 1 else 'http://127.0.0.1:8090/'
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -32,21 +32,14 @@ def main():
 
     status, result = request((ROOT / 'public/assets/example.txt').read_text(encoding='utf8'), require_yak_signature=True)
     assert status == 200 and result['gotoBefore'] > 0 and result['gotoAfter'] == 0
-    assert 'for' in result['code'] and 'Count: ' in result['code']
+    assert 'while' in result['code'] and 'Count: ' in result['code']
     assert result['syntaxChecked'] is True
     print('PASS sample is decoded')
 
-    for code, expected in [('', 422), ('<?php if (', 422), ('a' * 5242881, 413)]:
+    for code, expected in [('', 422), ('<?php if (', 422), ('a' * 2097153, 413)]:
         status, result = request(code)
         assert status == expected and result['ok'] is False
         print('PASS invalid/oversized code rejected:', status)
-
-    # Transport regression: valid code under 5 MB whose escaped JSON body
-    # exceeds the old 8 MB transport cap (backslashes double) must pass.
-    bulky = '<?php /* ' + '\\' * 4500000 + ' */ echo 1;'
-    status, result = request(bulky)
-    assert status == 200 and result['syntaxChecked'] is True and 'echo 1' in result['code']
-    print('PASS bulky-but-valid code with 9 MB JSON body accepted')
 
     for body, content_type, expected in [(b'{broken', 'application/json', 400),
                                           (b'{}', 'text/plain', 415),
@@ -125,7 +118,7 @@ foreach ([false, true] as $flag) {
     status, result = request(data=json.dumps({'code': signed, 'completeFile': 'yes'}).encode())
     assert status == 400
     print('PASS full-file flag type validated')
-    print('29 HTTP checks passed')
+    print('28 HTTP checks passed')
 
 
 if __name__ == '__main__':

@@ -22,9 +22,9 @@ $contentType = strtolower(trim(explode(';', $_SERVER['CONTENT_TYPE'] ?? '')[0]))
 if ($contentType !== 'application/json') {
     respond(['ok' => false, 'error' => 'Ожидается запрос в формате JSON.'], 415);
 }
-$body = file_get_contents('php://input', false, null, 0, 33554433);
-if ($body === false || strlen($body) > 33554432) {
-    respond(['ok' => false, 'error' => 'Запрос слишком большой. Допустимый размер кода — 5 МБ.'], 413);
+$body = file_get_contents('php://input', false, null, 0, 8388609);
+if ($body === false || strlen($body) > 8388608) {
+    respond(['ok' => false, 'error' => 'Запрос слишком большой. Допустимый размер кода — 2 МБ.'], 413);
 }
 $input = json_decode($body, true);
 if (!is_array($input) || !isset($input['code']) || !is_string($input['code'])) {
@@ -34,8 +34,8 @@ $code = $input['code'];
 if (trim($code) === '') {
     respond(['ok' => false, 'error' => 'Сначала вставьте PHP-код.'], 422);
 }
-if (strlen($code) > 5242880) {
-    respond(['ok' => false, 'error' => 'Код слишком большой. Допустимый размер — 5 МБ.'], 413);
+if (strlen($code) > 2097152) {
+    respond(['ok' => false, 'error' => 'Код слишком большой. Допустимый размер — 2 МБ.'], 413);
 }
 if (array_key_exists('requireYakSignature', $input) && !is_bool($input['requireYakSignature'])) {
     respond(['ok' => false, 'error' => 'Параметр проверки подписи должен быть логическим значением.'], 400);

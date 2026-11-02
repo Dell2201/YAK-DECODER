@@ -66,8 +66,8 @@ async function decode() {
     code.focus();
     return;
   }
-  if (encoder.encode(code.value).length > 5 * 1024 * 1024) {
-    setStatus('Код слишком большой. Допустимый размер — 5 МБ.', 'error');
+  if (encoder.encode(code.value).length > 2 * 1024 * 1024) {
+    setStatus('Код слишком большой. Допустимый размер — 2 МБ.', 'error');
     return;
   }
   if (requireYakSignature.checked && !code.value.includes(yakSignature)) {

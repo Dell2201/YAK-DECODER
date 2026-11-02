@@ -5,7 +5,7 @@ const path = require('node:path');
 const core = require('../public/assets/batch-core.js');
 const ROOT = path.resolve(__dirname, '..');
 const OUTPUT = path.resolve(process.argv[2] || path.join(require('node:os').tmpdir(), 'yak-batch-tests-' + Date.now()));
-const URL = process.argv[3] || 'http://127.0.0.1:18090/decode.php';
+const URL = process.argv[3] || 'http://127.0.0.1:8090/decode.php';
 const signature = '/* ' + core.SIGNATURE + ' 2.0.14 */';
 
 function file(name, data) {

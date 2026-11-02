@@ -170,18 +170,6 @@ class CfgStructurer
             $last = end($blocks);
             if ($last->term === null && !$last->stmts) {
                 array_pop($blocks);
-                // Labels of the region's trailing end block mean "fall off the
-                // end" (e.g. the next foreach iteration). When the enclosing
-                // structure maps such a label to a loop control, resolve it to
-                // that control: inside a nested emitted loop, falling off the
-                // region is a continue/break of the OUTER structure, not of
-                // the loop itself.
-                foreach ($last->labels as $endLabel) {
-                    if (isset($this->controls[$endLabel])) {
-                        unset($this->labelBlock[$endLabel]);
-                        $this->outer[$endLabel] = true;
-                    }
-                }
             }
         }
         foreach ($blocks as $i => $b) {
@@ -401,9 +389,9 @@ class CfgStructurer
                     }
                 }
             }
-            // Even without a discoverable in-region exit (infinite loops, loops
-            // leaving through an outer control), include dominated paths that
-            // end in break/continue so their side effects stay inside the loop.
+            if ($exit === null) {
+                continue;
+            }
             $seen = [];
             $stack = [$header];
             while ($stack) {
@@ -539,22 +527,8 @@ class CfgStructurer
                 throw new RegionFailed('runaway');
             }
             if ($loop !== null && !isset($loop->nodes[$cur->id()])) {
-                $control = $this->loopControl($cur, $loop);
-                if ($control !== null) {
-                    [$stmt, $exitLoop] = $control;
-                    if ($exitLoop !== null) {
-                        if ($exitLoop->exit !== null && $exitLoop->exit !== $cur) {
-                            throw new RegionFailed('multiple loop exits: fall ' . $cur
-                                . ' vs ' . $exitLoop->exit);
-                        }
-                        $exitLoop->exit = $cur;
-                    }
-                    $out[] = $stmt;
-                    return [$out, $cur];
-                }
                 if ($loop->exit !== null && $loop->exit !== $cur) {
-                    throw new RegionFailed('multiple loop exits: fall ' . $cur
-                        . ' vs ' . $loop->exit);
+                    throw new RegionFailed('multiple loop exits');
                 }
                 $loop->exit = $cur;
                 $out[] = new Stmt\Break_();
@@ -563,17 +537,6 @@ class CfgStructurer
             if ($loop !== null && $cur === $loop->header && !$firstIter) {
                 $out[] = new Stmt\Continue_();
                 return [$out, $cur];
-            }
-            if ($loop !== null) {
-                // Falling onto the dedicated increment block of an enclosing
-                // for-loop means continuing that loop, not running the block
-                // inline (it is emitted as the for-increment).
-                for ($lvl = 2, $anc = $loop->parent; $anc !== null; $anc = $anc->parent, $lvl++) {
-                    if ($cur === $anc->continueBlock) {
-                        $out[] = new Stmt\Continue_(new Scalar\LNumber($lvl));
-                        return [$out, $cur];
-                    }
-                }
             }
             $firstIter = false;
 
@@ -596,19 +559,15 @@ class CfgStructurer
             }
             $this->placed[$cur->id()] = true;
 
-            $lastStmt = end($cur->stmts);
             foreach ($cur->stmts as $statement) {
                 if ($statement instanceof Stmt\Foreach_ || $statement instanceof Stmt\Switch_) {
                     $this->attachNativeControls($statement, $cur->succ[0] ?? null, $loop);
-                } else {
-                    $this->attachNestedControls($statement, $cur->succ[0] ?? null, $loop, 0,
-                        $statement === $lastStmt);
                 }
                 $out[] = $statement;
             }
 
             if ($cur->term === null) {
-                $cur = $this->resolveBlock($cur->fall);
+                $cur = $cur->fall;
                 continue;
             }
             if ($cur->term[0] === 'end') {
@@ -627,21 +586,14 @@ class CfgStructurer
                         $out[] = new Stmt\Continue_();
                         return [$out, $tgt];
                     }
-                    $control = $this->loopControl($tgt, $loop);
-                    if ($control !== null) {
-                        [$stmt, $exitLoop] = $control;
-                        if ($exitLoop !== null) {
-                            if ($exitLoop->exit !== null && $exitLoop->exit !== $tgt) {
-                                throw new RegionFailed('multiple loop exits: goto ' . $tgt
-                                    . ' vs ' . $exitLoop->exit);
-                            }
-                            $exitLoop->exit = $tgt;
+                    if (!isset($loop->nodes[$tgt->id()])) {
+                        if ($loop->exit !== null && $loop->exit !== $tgt) {
+                            throw new RegionFailed('multiple loop exits');
                         }
-                        $out[] = $stmt;
+                        $loop->exit = $tgt;
+                        $out[] = new Stmt\Break_();
                         return [$out, $tgt];
                     }
-                    $cur = $tgt;
-                    continue;
                 }
                 $cur = $tgt;
                 continue;
@@ -655,39 +607,6 @@ class CfgStructurer
             $out = array_merge($out, $this->emitControl($cur, $loop));
         }
         return [$out, $cur];
-    }
-
-    /**
-     * Try to express a jump to $tgt as break/continue of this loop or of an
-     * enclosing one. Returns [statement, exitLoop] or null for a plain
-     * internal jump. $exitLoop is non-null when the jump leaves that loop,
-     * and the caller enforces the single-exit rule for it.
-     */
-    private function loopControl($tgt, object $loop): ?array
-    {
-        // A dedicated increment block of an enclosing for-loop.
-        for ($lvl = 2, $anc = $loop->parent; $anc !== null; $anc = $anc->parent, $lvl++) {
-            if ($tgt === $anc->continueBlock) {
-                return [new Stmt\Continue_(new Scalar\LNumber($lvl)), null];
-            }
-        }
-        if (isset($loop->nodes[$tgt->id()])) {
-            return null;
-        }
-        for ($lvl = 2, $anc = $loop->parent; $anc !== null; $anc = $anc->parent, $lvl++) {
-            if ($tgt === $anc->header && $anc->hasHeaderCond) {
-                return [new Stmt\Continue_(new Scalar\LNumber($lvl)), null];
-            }
-            if ($tgt === $anc->exit) {
-                return [new Stmt\Break_(new Scalar\LNumber($lvl)), null];
-            }
-            if (isset($anc->nodes[$tgt->id()])) {
-                // Mid-body block of an enclosing loop: still expressible as
-                // this loop's own single exit (break + fall-through).
-                return null;
-            }
-        }
-        return [new Stmt\Break_(), $loop];
     }
 
     private function emitControl(string $target, ?object $loop): array
@@ -713,7 +632,7 @@ class CfgStructurer
         return [$control['kind'] === 'break' ? new Stmt\Break_($number) : new Stmt\Continue_($number)];
     }
 
-    private function attachNativeControls(Node $statement, $after, ?object $loop, int $bias = 0, bool $allowAfter = true): void
+    private function attachNativeControls(Node $statement, $after, ?object $loop): void
     {
         $seen = [];
         while ($after instanceof CfgBlock && !$after->stmts
@@ -728,22 +647,22 @@ class CfgStructurer
         }
         $controls = $this->controls;
         foreach ($controls as &$control) {
-            $control['depth'] += count($contexts) + 1 + $bias;
+            $control['depth'] += count($contexts) + 1;
         }
         unset($control);
         foreach ($this->labelBlock as $label => $_) {
             $target = $this->target($label);
-            if ($allowAfter && $target === $after) {
-                $controls[$label] = ['kind' => 'break', 'depth' => 1 + $bias];
+            if ($target === $after) {
+                $controls[$label] = ['kind' => 'break', 'depth' => 1];
                 continue;
             }
             foreach ($contexts as $level => $context) {
                 if ($target === $context->exit) {
-                    $controls[$label] = ['kind' => 'break', 'depth' => $level + 2 + $bias];
+                    $controls[$label] = ['kind' => 'break', 'depth' => $level + 2];
                     break;
                 }
                 if ($target === $context->header) {
-                    $controls[$label] = ['kind' => 'continue', 'depth' => $level + 2 + $bias];
+                    $controls[$label] = ['kind' => 'continue', 'depth' => $level + 2];
                     break;
                 }
             }
@@ -757,52 +676,6 @@ class CfgStructurer
         $statement->setAttribute('deob_controls', $controls);
     }
 
-    /**
-     * Attach loop controls to foreach/switch statements buried in the
-     * emitted statement's own body (inside if/else/try, not inside another
-     * loop). Their bodies are converted later without the emission context,
-     * so they need the mapping while the label blocks are still known.
-     * $bias counts the enclosing loops crossed on the way down; $tail says
-     * the statement is the last thing that runs on the path to the block
-     * successor, which makes "jump to the block after" a plain break.
-     */
-    private function attachNestedControls(Node $node, $after, ?object $loop, int $bias, bool $tail): void
-    {
-        // Jumps never cross function/closure scopes.
-        if ($node instanceof Stmt\Function_ || $node instanceof Stmt\ClassMethod
-            || $node instanceof Stmt\ClassLike || $node instanceof Stmt\Trait_
-            || $node instanceof Expr\Closure || $node instanceof Expr\ArrowFunction) {
-            return;
-        }
-        // Opaque loops own their body conversion (their emission adds the
-        // loop level itself), so do not descend into them.
-        if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_) {
-            if ($node->getAttribute('deob_controls') === null) {
-                $this->attachNativeControls($node, $after, $loop, $bias, $tail);
-            }
-            return;
-        }
-        $add = ($node instanceof Stmt\While_ || $node instanceof Stmt\For_
-            || $node instanceof Stmt\Do_) ? 1 : 0;
-        $tailPass = $node instanceof Stmt\If_ || $node instanceof Stmt\Else_
-            || $node instanceof Stmt\ElseIf_;
-        foreach ($node->getSubNodeNames() as $name) {
-            $v = $node->$name;
-            if (is_array($v)) {
-                $lastIdx = count($v) - 1;
-                foreach ($v as $i => $child) {
-                    if ($child instanceof Node) {
-                        $this->attachNestedControls($child, $after, $loop, $bias + $add,
-                            $tail && $tailPass && $i === $lastIdx);
-                    }
-                }
-            } elseif ($v instanceof Node) {
-                $this->attachNestedControls($v, $after, $loop, $bias + $add,
-                    $tail && $tailPass);
-            }
-        }
-    }
-
     private function emitBranch(CfgBlock $b, array $stop, ?object $loop, array &$out)
     {
         $cond = $b->term[1];
@@ -811,29 +684,14 @@ class CfgStructurer
 
         $M = $this->merge($T, $F, $loop);
         if ($M === null) {
-            // A branch arm that targets the loop header is a conditional
-            // continue: the header is usually in the stop set (or resolves
-            // to an empty emission), which must not drop the condition.
-            if ($loop !== null && $T === $loop->header) {
-                $then = [new Stmt\Continue_()];
-            } else {
-                [$then] = $this->emit($T, $stop + ['OUT' => true], $loop);
-            }
-            if ($loop !== null && $F === $loop->header) {
-                $else = [new Stmt\Continue_()];
-            } else {
-                [$else] = $this->emit($F, $stop + ['OUT' => true], $loop);
-            }
+            [$then] = $this->emit($T, $stop + ['OUT' => true], $loop);
+            [$else] = $this->emit($F, $stop + ['OUT' => true], $loop);
             if ($then && $else) {
                 $out[] = new Stmt\If_($cond, ['stmts' => $then, 'else' => new Stmt\Else_($else)]);
             } elseif ($then) {
                 $out[] = new Stmt\If_($cond, ['stmts' => $then]);
             } elseif ($else) {
                 $out[] = new Stmt\If_($this->negate($cond), ['stmts' => $else]);
-            } else {
-                // Neither arm is expressible here; emitting nothing would
-                // silently lose the condition. Fail the region instead.
-                throw new RegionFailed('branch with both arms stopped: ' . $b->id());
             }
             return null;
         }
@@ -862,8 +720,7 @@ class CfgStructurer
     private function emitLoop(CfgBlock $header, ?object $parent): array
     {
         $lnodes = $this->loops[$header->id()]['nodes'];
-        $loop = (object)['header' => $header, 'nodes' => $lnodes, 'exit' => null, 'parent' => $parent,
-            'continueBlock' => null, 'hasHeaderCond' => true];
+        $loop = (object)['header' => $header, 'nodes' => $lnodes, 'exit' => null, 'parent' => $parent];
 
         $cond = null;
         $entry = null;
@@ -935,7 +792,6 @@ class CfgStructurer
                 foreach ($latch->stmts as $statement) {
                     $inner[] = $statement;
                 }
-                $loop->hasHeaderCond = false;
                 return [[new Stmt\Do_($dcond, $inner)], $loop->exit];
             }
             return [[new Stmt\While_(new Expr\ConstFetch(new Node\Name('true')), $inner)], $loop->exit];
@@ -943,52 +799,6 @@ class CfgStructurer
 
         $this->placed[$header->id()] = true;
         $body0 = $header->stmts;
-
-        // for-shape: when exactly one dedicated latch block leads back to the
-        // header, emit `for` with that block as the increment. Jumps to the
-        // latch (e.g. continue 2 from a nested loop) then become `continue N`
-        // instead of duplicating the increment inside the body.
-        if ($body0 === [] && $entry !== null) {
-            $latch = null;
-            $forOk = true;
-            foreach ($lnodes as $n) {
-                if ($n === $header) {
-                    continue;
-                }
-                foreach ($n->succ as $s) {
-                    if ($s === $header) {
-                        if ($latch !== null && $latch !== $n) {
-                            $forOk = false;
-                            break 2;
-                        }
-                        $latch = $n;
-                    }
-                }
-            }
-            $latchExprs = null;
-            if ($forOk && $latch !== null) {
-                $latchExprs = [];
-                foreach ($latch->stmts as $ls) {
-                    if (!$ls instanceof Stmt\Expression) {
-                        $latchExprs = null;
-                        break;
-                    }
-                    $latchExprs[] = $ls->expr;
-                }
-            }
-            if ($latchExprs !== null && $latch !== $entry
-                && ($latch->term === null || $latch->term[0] === 'goto')) {
-                $loop->continueBlock = $latch;
-                [$inner, ] = $this->emit($entry, [$header->id() => $header, $latch->id() => $latch], $loop);
-                while ($inner && end($inner) instanceof Stmt\Continue_
-                    && (end($inner)->num === null || end($inner)->num instanceof Scalar\LNumber && end($inner)->num->value === 1)) {
-                    array_pop($inner);
-                }
-                $this->placed[$latch->id()] = true;
-                return [[new Stmt\For_(['init' => [], 'cond' => [$cond], 'loop' => $latchExprs, 'stmts' => $inner])], $loop->exit];
-            }
-        }
-
         [$inner, ] = $this->emit($entry, [$header->id() => $header], $loop);
         $body = $body0; foreach ($inner as $__x) { $body[] = $__x; }
         while ($body && end($body) instanceof Stmt\Continue_

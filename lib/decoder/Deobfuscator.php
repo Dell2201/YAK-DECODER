@@ -2,23 +2,18 @@
 /**
  * YAK Pro (yakpro-po 2.x) deobfuscator on top of nikic/php-parser.
  *
- * The obfuscator flattens control flow: each statement list is shuffled into
- * `label: <stmt>; goto next;` chunks, branches/loops become goto templates,
- * and break N / continue N become gotos to the N-th enclosing loop's labels.
- * Strings are printed as \xHH / \OOO escapes (php-parser decodes them).
+ * Inverts the obfuscator's own AST rewrites (see the 2.x sources):
  *
- * This class owns region selection and safety: every statement list (function
- * bodies, closures, foreach/switch bodies, top-level code) is attempted as a
- * region; nested bodies convert first and their results survive a failure of
- * the enclosing region. CfgStructurer rebuilds the structured code from the
- * CFG (dominators, loops, regions, multi-level break/continue, `for` shapes).
+ *  - shuffle_statements(): each statement becomes  label: <stmt>; goto next;
+ *    and the chunks are randomly permuted. The original order is still encoded
+ *    in the goto chain, so we follow it ("unshuffle").
+ *  - if/else/while/for/do become fixed goto templates, folded back here.
+ *  - break N / continue N become gotos to the N-th enclosing loop's labels.
+ *  - strings were printed as \xHH / \OOO escapes (php-parser decodes them).
  *
- * A region is restructured only when the CFG emission succeeds and the
- * payload check passes; a failure keeps the original shape of that region.
- * A restructured region may keep goto soup in nested bodies that failed
- * independently, as long as no kept body jumps to a label of the
- * restructured region itself (those labels disappear; see
- * keptGotosAreStable / cross-level revert).
+ * A body is replaced only if the conversion is complete; otherwise the
+ * original body is kept. Payload checks prevent missing/duplicated atoms;
+ * differential execution tests separately check representative control flow.
  */
 
 require __DIR__ . '/autoload.php';
@@ -26,36 +21,20 @@ require __DIR__ . '/CfgStructurer.php';
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Scalar;
 use PhpParser\Node\Stmt;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
 
 class Deobfuscator
 {
+    private $alias = [];
+    private $unresolved = false;
+    public $failLabel = null;
     public $lastError = null;
     public $failures = [];
     public $stats = ['converted' => 0, 'kept' => 0];
     public $removedBlocks = [];
-    public $trace = [];
-    private $ctxStack = [];
-    /** @var array[] label scopes of nested bodies kept as-is during a region walk */
-    private $scopeStack = [];
-    /** true while converting nested bodies before a region emission */
-    private $preWalk = false;
-
-    private function ctxDesc($s): string
-    {
-        if ($s instanceof Stmt\Function_) return 'function ' . $s->name->toString();
-        if ($s instanceof Stmt\ClassMethod_) return 'method ' . $s->name->toString();
-        if ($s instanceof Stmt\Class_) return 'class ' . $s->name->toString();
-        if ($s instanceof Expr\Closure) return 'closure';
-        if ($s instanceof Stmt\Foreach_) return 'foreach';
-        if ($s instanceof Stmt\Switch_) return 'switch';
-        if ($s instanceof Stmt\If_) return 'if';
-        if ($s instanceof Stmt\TryCatch) return 'try';
-        if ($s instanceof Stmt\Namespace_) return 'namespace';
-        return $s->getType();
-    }
 
     public function processFile(string $code): string
     {
@@ -89,44 +68,19 @@ class Deobfuscator
 
     public function processBody(array $stmts, ?string $breakLabel = null, ?string $contLabel = null, array $controls = []): array
     {
-        $ctx = implode(' > ', $this->ctxStack);
-        if (!$this->preWalk) {
-            $this->trace[] = ['ctx' => $ctx, 'n' => count($stmts), 'kind' => 'attempt'];
-        }
         if (!$this->listNeedsWork($stmts) && (!$controls || !$this->hasGotoOrLabel($stmts))) {
             return $this->processNested($stmts);
         }
         if (count($stmts) > 6000) {   // pathological method: keep as is
-            if (!$this->preWalk) {
-                $this->stats['kept']++;
-                $this->trace[] = ['ctx' => $ctx, 'n' => count($stmts), 'kind' => 'kept', 'reason' => 'too big'];
-            }
+            $this->stats['kept']++;
             return $stmts;
         }
-        // Labels defined in this region before any nested conversion.
-        $preLabels = $this->labelNames($stmts);
-        // Convert nested bodies first: functions, closures, if bodies and
-        // self-contained foreach/switch bodies stay converted even when this
-        // region later reverts to its original shape. These attempts are
-        // quiet: bodies that need the region's loop controls are retried (and
-        // properly recorded) after emission.
-        $savedPreWalk = $this->preWalk;
-        $this->preWalk = true;
-        try {
-            $stmts = $this->processNested($stmts);
-        } finally {
-            $this->preWalk = $savedPreWalk;
-        }
-        // Controls attached by an earlier (pre-walk) emission of an
-        // enclosing region refer to a CFG that no longer exists; drop them
-        // so the retry below uses this region's own context.
-        $this->stripStaleControls($stmts);
         $original = $stmts;
         $cloner = new \PhpParser\NodeTraverser();
         $cloner->addVisitor(new \PhpParser\NodeVisitor\CloningVisitor());
-        $work = $cloner->traverse($stmts);
+        $stmts = $cloner->traverse($stmts);
         try {
-            $st = new CfgStructurer($work, array_values(array_filter([$breakLabel, $contLabel])), $breakLabel, $contLabel, $controls);
+            $st = new CfgStructurer($stmts, array_values(array_filter([$breakLabel, $contLabel])), $breakLabel, $contLabel, $controls);
             $st->reach = $st->reachable();
             $st->nodes = array_values($st->reach);
             $st->dom = $st->dominators($st->nodes);
@@ -145,58 +99,24 @@ class Deobfuscator
             ksort($expected);
             ksort($actual);
             if ($expected !== $actual) {
-                $diff = [];
-                foreach ($expected as $k => $v) {
-                    if (($actual[$k] ?? 0) !== $v) { $diff[] = "$k exp=$v act=" . ($actual[$k] ?? 0); }
-                }
-                foreach ($actual as $k => $v) {
-                    if (!isset($expected[$k])) { $diff[] = "$k exp=0 act=$v"; }
-                }
-                throw new RegionFailed('payload mismatch (loss or duplication): ' . implode('; ', array_slice($diff, 0, 12)));
+                throw new RegionFailed('payload mismatch (loss or duplication)');
             }
         } catch (Throwable $e) {
-            if (!$this->preWalk) {
-                $this->lastError = $e->getMessage();
-                $this->failures[] = ['line' => $original[0]->getStartLine(), 'reason' => $this->lastError];
-                $this->stats['kept']++;
-                $this->trace[] = ['ctx' => $ctx, 'n' => count($original), 'kind' => 'kept', 'reason' => $this->lastError];
-            }
+            $this->lastError = $e->getMessage();
+            $this->failures[] = ['line' => $stmts[0]->getStartLine(), 'reason' => $this->lastError];
+            $this->stats['kept']++;
             return $original;
         }
 
         $auditCount = count($this->removedBlocks);
-        // Retry obfuscated foreach/switch bodies with the loop controls
-        // attached during emission; remember bodies that stay obfuscated.
-        $this->scopeStack[] = [];
         $result = $this->processNested($result);
-        $keptScopes = array_pop($this->scopeStack);
 
         if ($this->hasGotoOrLabel($result)) {
-            if (!$this->keptGotosAreStable($result, $keptScopes, $preLabels)) {
-                // A kept body jumps to a label of this region or of a
-                // restructured sibling; restructuring would orphan that jump.
-                $this->removedBlocks = array_slice($this->removedBlocks, 0, $auditCount);
-                $this->lastError = 'cross-level goto in kept nested body';
-                $this->failures[] = ['line' => $original[0]->getStartLine(), 'reason' => $this->lastError];
-                $this->stats['kept']++;
-                $this->trace[] = ['ctx' => $ctx, 'n' => count($original), 'kind' => 'kept', 'reason' => $this->lastError];
-                return $original;
-            }
-            // Partial success: the region itself is structured; remaining
-            // gotos belong to nested bodies that recorded their own failures.
-            if (!$this->preWalk) {
-                $this->trace[] = ['ctx' => $ctx, 'n' => count($original), 'kind' => 'converted', 'partial' => true];
-            }
-        } elseif (!$this->preWalk) {
-            $this->trace[] = ['ctx' => $ctx, 'n' => count($original), 'kind' => 'converted'];
-        }
-        // Kept bodies remain unrestructured inside the emitted result, so
-        // their labels stay available to the enclosing region.
-        if ($this->scopeStack) {
-            $this->scopeStack[count($this->scopeStack) - 1] = array_merge(
-                $this->scopeStack[count($this->scopeStack) - 1],
-                $keptScopes
-            );
+            $this->removedBlocks = array_slice($this->removedBlocks, 0, $auditCount);
+            $this->lastError = 'has-goto';
+            $this->failures[] = ['line' => $stmts[0]->getStartLine(), 'reason' => $this->lastError];
+            $this->stats['kept']++;
+            return $original;
         }
         $printer = new DeobPrinter();
         foreach ($st->blocks as $block) {
@@ -262,130 +182,32 @@ class Deobfuscator
             if (!$s instanceof Node) {
                 continue;
             }
-            $this->ctxStack[] = $this->ctxDesc($s);
-            try {
-                $controls = $s->getAttribute('deob_controls');
-                if ($controls !== null && $s instanceof Stmt\Foreach_) {
-                    $s->stmts = $this->attemptNested($s->stmts, $controls);
-                    continue;
+            $controls = $s->getAttribute('deob_controls');
+            if ($controls !== null && $s instanceof Stmt\Foreach_) {
+                $s->stmts = $this->processBody($s->stmts, null, null, $controls);
+                continue;
+            }
+            if ($controls !== null && $s instanceof Stmt\Switch_) {
+                foreach ($s->cases as $case) {
+                    $case->stmts = $this->processBody($case->stmts, null, null, $controls);
                 }
-                if ($controls !== null && $s instanceof Stmt\Switch_) {
-                    foreach ($s->cases as $case) {
-                        $case->stmts = $this->attemptNested($case->stmts, $controls);
+                continue;
+            }
+            foreach ($s->getSubNodeNames() as $name) {
+                $v = $s->$name;
+                if (is_array($v) && isset($v[0]) && $v[0] instanceof Node) {
+                    if ($this->listNeedsWork($v)) {
+                        $s->$name = $this->processBody($v);
+                    } else {
+                        $this->processNested($v);
                     }
-                    continue;
+                } elseif ($v instanceof Node) {
+                    $this->processNested([$v]);
                 }
-                foreach ($s->getSubNodeNames() as $name) {
-                    $v = $s->$name;
-                    if (is_array($v) && isset($v[0]) && $v[0] instanceof Node) {
-                        // A lone goto is only convertible with the loop
-                        // controls attached after region emission.
-                        $loneGoto = count($v) === 1 && $v[0] instanceof Stmt\Goto_;
-                        if ($this->listNeedsWork($v) && !$loneGoto) {
-                            $s->$name = $this->attemptNested($v, $this->seedControls($s, $v, $name));
-                        } else {
-                            $this->processNested($v);
-                        }
-                    } elseif ($v instanceof Node) {
-                        $this->processNested([$v]);
-                    }
-                }
-            } finally {
-                array_pop($this->ctxStack);
             }
         }
         return $stmts;
     }
-
-    /** Remove deob_controls attributes left by earlier region emissions. */
-    private function stripStaleControls(array $stmts): void
-    {
-        foreach ($this->findForeachSwitch($stmts) as $node) {
-            $node->setAttribute('deob_controls', null);
-        }
-    }
-
-    /** @return Stmt\Foreach_[]|Stmt\Switch_[] */
-    private function findForeachSwitch(array $stmts): array
-    {
-        $found = [];
-        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($stmts, Node::class) as $node) {
-            if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_) {
-                $found[] = $node;
-            }
-        }
-        return $found;
-    }
-
-    /** Attempt a nested body; remember it as a stable label scope when kept. */
-    private function attemptNested(array $stmts, array $controls = [])
-    {
-        $result = $controls ? $this->processBody($stmts, null, null, $controls) : $this->processBody($stmts);
-        if ($result === $stmts && $this->scopeStack) {
-            $this->scopeStack[count($this->scopeStack) - 1][] = $result;
-        }
-        return $result;
-    }
-
-    /**
-     * Loop controls for a foreach body attempted without emission context:
-     * falling off the end of the body (a jump to its trailing label) is a
-     * `continue` of the foreach itself.
-     */
-    private function seedControls(Node $owner, array $body, string $name): array
-    {
-        $controls = [];
-        if ($owner instanceof Stmt\Foreach_ && $name === 'stmts'
-            && count($body) && end($body) instanceof Stmt\Label) {
-            $controls[end($body)->name->name] = ['kind' => 'continue', 'depth' => 1];
-        }
-        return $controls;
-    }
-    /** All label names defined anywhere inside the given statements. */
-    private function labelNames(array $stmts): array
-    {
-        $names = [];
-        foreach ($this->findLabels($stmts) as $label) {
-            $names[$label->name->name] = true;
-        }
-        return $names;
-    }
-
-    /** @return Stmt\Label[] */
-    private function findLabels(array $stmts): array
-    {
-        return (new \PhpParser\NodeFinder())->findInstanceOf($stmts, Stmt\Label::class);
-    }
-
-    /**
-     * After a successful emission, remaining gotos may only live in nested
-     * bodies kept as-is. Their targets must be defined inside those kept
-     * bodies or outside this region entirely; labels of the restructured
-     * region itself (or of restructured siblings) no longer exist where the
-     * original code expected them.
-     */
-    private function keptGotosAreStable(array $result, array $keptScopes, array $preLabels): bool
-    {
-        $stable = [];
-        foreach ($keptScopes as $scope) {
-            foreach ($this->findLabels($scope) as $label) {
-                $stable[$label->name->name] = true;
-            }
-        }
-        $gotos = (new \PhpParser\NodeFinder())->findInstanceOf($result, Stmt\Goto_::class);
-        foreach ($gotos as $goto) {
-            $name = $goto->name->name;
-            if (isset($stable[$name])) {
-                continue;
-            }
-            if (isset($preLabels[$name])) {
-                return false;
-            }
-            // Defined outside this region: unaffected by the restructure.
-        }
-        return true;
-    }
-
     private function listNeedsWork(array $stmts): bool
     {
         foreach ($stmts as $s) {
@@ -426,6 +248,115 @@ class Deobfuscator
         return false;
     }
 
+    // ------------------------------------------------------------------
+    // 1. unshuffle
+    // ------------------------------------------------------------------
+
+    public function unshuffle(array $stmts): ?array
+    {
+        if (!$stmts || !$stmts[0] instanceof Stmt\Goto_) {
+            return null;
+        }
+        $pos = [];
+        foreach ($stmts as $i => $s) {
+            if ($s instanceof Stmt\Label) {
+                $pos[$s->name->name] = $i;
+            }
+        }
+        if (!isset($pos[$stmts[0]->name->name])) {
+            return null;
+        }
+        $this->alias = $this->resolveAliases($stmts, $pos);
+        $alias = $this->alias;
+
+        $flat = [];
+        $seen = [];
+        $n = count($stmts);
+
+        $emit = function (int $start) use (&$flat, $stmts, $n, $alias, $pos) {
+            $end = $start + 1;
+            while ($end < $n && !$stmts[$end] instanceof Stmt\Label) {
+                $end++;
+            }
+            $chunk = array_slice($stmts, $start, $end - $start);
+            $link = null;
+            if ($chunk && end($chunk) instanceof Stmt\Goto_) {
+                $link = array_pop($chunk)->name->name;
+            }
+            foreach ($chunk as $c) {
+                $flat[] = $c;
+            }
+            if ($link === null) {
+                return null;
+            }
+            $resolved = $alias[$link] ?? $link;
+            return $pos[$resolved] ?? ($pos[$link] ?? null);
+        };
+
+        $cur = $pos[$stmts[0]->name->name];
+        while ($cur !== null && !isset($seen[$cur])) {
+            $seen[$cur] = true;
+            $cur = $emit($cur);
+        }
+        // blocks reachable only through jumps: keep them so labels stay defined
+        foreach ($pos as $name => $start) {
+            if (isset($seen[$start])) {
+                continue;
+            }
+            $c = $start;
+            while ($c !== null && !isset($seen[$c])) {
+                $seen[$c] = true;
+                $c = $emit($c);
+            }
+        }
+        return $flat;
+    }
+
+    private function resolveAliases(array $stmts, array $pos): array
+    {
+        $n = count($stmts);
+        $alias = [];
+        foreach ($pos as $name => $i) {
+            $j = $i;
+            while ($j < $n && $stmts[$j] instanceof Stmt\Label) {
+                $j++;
+            }
+            if ($j < $n && $stmts[$j] instanceof Stmt\Goto_
+                && ($j + 1 >= $n || $stmts[$j + 1] instanceof Stmt\Label)) {
+                $alias[$name] = $stmts[$j]->name->name;
+            }
+        }
+        foreach ($alias as $k => $v) {
+            $guard = [$k => true];
+            while (isset($alias[$v]) && !isset($guard[$v])) {
+                $guard[$v] = true;
+                $v = $alias[$v];
+            }
+            $alias[$k] = $v;
+        }
+        return $alias;
+    }
+
+    private function target(string $name): string
+    {
+        return $this->alias[$name] ?? $name;
+    }
+
+    // ------------------------------------------------------------------
+    // 2. fold templates
+    // ------------------------------------------------------------------
+
+    private function labelIndex(array $s, string $name, int $from, int $to): ?int
+    {
+        $name = $this->target($name);
+        for ($i = $from; $i < $to; $i++) {
+            if ($s[$i] instanceof Stmt\Label && $s[$i]->name->name === $name) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
     private function isSingleGoto(Stmt\If_ $if): ?string
     {
         if ($if->else !== null || count($if->elseifs) !== 0) {
@@ -437,6 +368,196 @@ class Deobfuscator
         return null;
     }
 
+    private function negate(Expr $e): Expr
+    {
+        return $e instanceof Expr\BooleanNot ? $e->expr : new Expr\BooleanNot($e);
+    }
+
+    /** Resolve a goto to break/continue of one of the enclosing loops. */
+    private function jumpToLoopControl(string $t, array $loops): ?Node
+    {
+        $n = count($loops);
+        for ($k = $n - 1, $depth = 1; $k >= 0; $k--, $depth++) {
+            $lp = $loops[$k];
+            if ($t === $lp['break']) {
+                return new Stmt\Break_($depth > 1 ? new Scalar\LNumber($depth) : null);
+            }
+            if ($lp['continue'] !== null && $t === $lp['continue']) {
+                return new Stmt\Continue_($depth > 1 ? new Scalar\LNumber($depth) : null);
+            }
+        }
+        return null;
+    }
+
+    private function build(array $s, int $from, int $to, array $loops): array
+    {
+        $out = [];
+        $i = $from;
+        while ($i < $to) {
+            $st = $s[$i];
+
+            if ($st instanceof Stmt\Label) {
+                $loopInfo = $this->detectLoop($s, $i, $to);
+                if ($loopInfo !== null) {
+                    [$header, $if, $breakIdx, $contIdx, $exprRange] = $loopInfo;
+                    $breakLabel = $this->target($if->stmts[0]->name->name);
+                    $contLabel = $exprRange !== null ? $s[$contIdx]->name->name : $header;
+                    $ctx = ['break' => $breakLabel, 'continue' => $contLabel];
+                    $inner = array_merge($loops, [$ctx]);
+                    $body = $this->build($s, $i + 2, $contIdx, $inner);
+                    $cond = $if->cond instanceof Expr\BooleanNot ? $if->cond->expr : $if->cond;
+                    if ($exprRange !== null) {
+                        $incr = $this->build($s, $exprRange[0], $exprRange[1], $inner);
+                        $out[] = new Stmt\For_([], [$cond], $incr, $body);
+                    } else {
+                        $out[] = new Stmt\While_($cond, $body);
+                    }
+                    $i = $breakIdx + 1;
+                    continue;
+                }
+                $i++;
+                continue;
+            }
+
+            if ($st instanceof Stmt\Goto_) {
+                $t = $this->target($st->name->name);
+                if ($i + 1 < $to && $s[$i + 1] instanceof Stmt\Label
+                    && $s[$i + 1]->name->name === $t) {
+                    $i++;
+                    continue;
+                }
+                $ctrl = $this->jumpToLoopControl($t, $loops);
+                if ($ctrl !== null) {
+                    $out[] = $ctrl;
+                    $i++;
+                    continue;
+                }
+                $this->unresolved = true;
+                if ($this->failLabel === null) {
+                    $this->failLabel = $t . ' at i=' . $i . ' to=' . $to;
+                }
+                $out[] = $st;
+                $i++;
+                continue;
+            }
+
+            if ($st instanceof Stmt\If_ && ($tgt = $this->isSingleGoto($st)) !== null) {
+                $tpos = $this->labelIndex($s, $tgt, $i + 1, $to);
+                if ($tpos === null) {
+                    $body = $this->build($s, $i + 1, $to, $loops);
+                    $out[] = new Stmt\If_($this->negate($st->cond), ['stmts' => $body]);
+                    return $out;
+                }
+                $prev = $this->lastMeaningful($s, $i + 1, $tpos);
+                if ($prev !== null && $s[$prev] instanceof Stmt\Goto_) {
+                    $elseBody = $this->build($s, $i + 1, $prev, $loops);
+                    $mergeLabel = $s[$prev]->name->name;
+                    $mpos = $this->labelIndex($s, $mergeLabel, $tpos + 1, $to);
+                    if ($mpos !== null) {
+                        $thenBody = $this->build($s, $tpos + 1, $mpos, $loops);
+                        $out[] = new Stmt\If_($st->cond, [
+                            'stmts' => $thenBody,
+                            'else' => new Stmt\Else_($elseBody),
+                        ]);
+                        $i = $mpos + 1;
+                        continue;
+                    }
+                }
+                $body = $this->build($s, $i + 1, $tpos, $loops);
+                $out[] = new Stmt\If_($this->negate($st->cond), ['stmts' => $body]);
+                $i = $tpos + 1;
+                continue;
+            }
+
+            if ($st instanceof Stmt\Foreach_ || $st instanceof Stmt\Switch_) {
+                $j = $i + 1;
+                $after = [];
+                while ($j < $to && $s[$j] instanceof Stmt\Label) {
+                    $after[] = $s[$j]->name->name;
+                    $j++;
+                }
+                if ($st instanceof Stmt\Foreach_) {
+                    $ctx = $after
+                        ? ['break' => $this->target($after[0]), 'continue' => null]
+                        : null;
+                    $st->stmts = $this->rebuildShuffled($st->stmts, $ctx === null ? $loops : array_merge($loops, [$ctx]));
+                } else {
+                    $ctx = count($after) >= 2
+                        ? ['break' => $this->target($after[1]), 'continue' => $this->target($after[0])]
+                        : null;
+                    $inner = $ctx === null ? $loops : array_merge($loops, [$ctx]);
+                    foreach ($st->cases as $case) {
+                        $case->stmts = $this->rebuildShuffled($case->stmts, $inner);
+                    }
+                }
+                $out[] = $st;
+                $i = $j;
+                continue;
+            }
+
+            $out[] = $st;
+            $i++;
+        }
+        return $out;
+    }
+
+    private function rebuildShuffled(array $stmts, array $loops): array
+    {
+        $flat = $this->unshuffle($stmts);
+        if ($flat === null) {
+            return $stmts;
+        }
+        $saved = $this->unresolved;
+        $this->unresolved = false;
+        $res = $this->build($flat, 0, count($flat), $loops);
+        if ($this->unresolved || $this->hasGotoOrLabel($res)) {
+            $this->unresolved = $saved;
+            return $stmts;
+        }
+        return $res;
+    }
+
+    private function lastMeaningful(array $s, int $from, int $to): ?int
+    {
+        for ($i = $to - 1; $i >= $from; $i--) {
+            if (!$s[$i] instanceof Stmt\Label) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
+    private function detectLoop(array $s, int $i, int $to): ?array
+    {
+        $header = $s[$i]->name->name;
+        if ($i + 1 >= $to || !$s[$i + 1] instanceof Stmt\If_) {
+            return null;
+        }
+        $if = $s[$i + 1];
+        $tgt = $this->isSingleGoto($if);
+        if ($tgt === null) {
+            return null;
+        }
+        $breakIdx = $this->labelIndex($s, $this->target($tgt), $i + 2, $to);
+        if ($breakIdx === null) {
+            return null;
+        }
+        $back = null;
+        for ($j = $i + 2; $j < $breakIdx; $j++) {
+            if ($s[$j] instanceof Stmt\Goto_ && $this->target($s[$j]->name->name) === $header) {
+                $back = $j;
+            }
+        }
+        if ($back === null) {
+            return null;
+        }
+        for ($k = $back - 1; $k > $i + 1; $k--) {
+            if ($s[$k] instanceof Stmt\Label) {
+                return [$header, $if, $breakIdx, $k, [$k + 1, $back]];
+            }
+        }
+        return [$header, $if, $breakIdx, $back, null];
+    }
 }
 
 /** Prints string literals readably while keeping the exact byte value. */
