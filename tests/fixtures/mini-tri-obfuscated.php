@@ -1,0 +1,8 @@
+<?php
+/*   __________________________________________________
+    |  Obfuscated by YAK Pro - Php Obfuscator  2.0.17  |
+    |              on 2026-11-02 18:22:46              |
+    |    GitHub: https://github.com/pk-fr/yakpro-po    |
+    |__________________________________________________|
+*/
+ goto Bl7Rb; SeA3N: JIHfo: goto xzNi9; xzNi9: $seW3C[] = "\x6f\165\x74\x65\162{$RKq9v}"; goto TMblC; OGw1w: $OGFdQ++; goto kZnkd; kZnkd: foreach ([1, 2] as $eeniG) { goto a3a11; g27AO: v3saa: goto pZyJ8; FCYCx: puKFU: goto voX2F; bnjI2: goto rdGHb; goto g27AO; sdW6S: zMBWZ: goto deC10; deC10: $seW3C[] = "\164{$RKq9v}{$OGFdQ}{$eeniG}"; goto JdpEH; JfgSV: $seW3C[] = "\143\62{$RKq9v}{$OGFdQ}{$eeniG}"; goto VEa_3; voX2F: if (!($eeniG === 2 && $OGFdQ === 3)) { goto zMBWZ; } goto j3er9; JdpEH: EsTVi: goto ssTej; pZyJ8: if (!($eeniG === 1 && $OGFdQ === 2)) { goto puKFU; } goto JfgSV; pujeo: $seW3C[] = "\142\63{$RKq9v}{$OGFdQ}{$eeniG}"; goto bnjI2; apcgI: goto JIHfo; goto sdW6S; j3er9: $seW3C[] = "\x62\x32{$RKq9v}{$OGFdQ}{$eeniG}"; goto apcgI; VEa_3: goto Xkc5t; goto FCYCx; a3a11: if (!($eeniG === 2 && $RKq9v === 1)) { goto v3saa; } goto pujeo; ssTej: } goto uGFbD; wWsaN: if (!($OGFdQ < 3)) { goto JIHfo; } goto OGw1w; WwaWF: $OGFdQ = 0; goto K_kjG; cWmx6: $RKq9v++; goto jSfui; Bl7Rb: $seW3C = []; goto SMAY7; SMAY7: $RKq9v = 0; goto q4vvZ; rc1Hw: if (!($RKq9v < 3)) { goto rdGHb; } goto WwaWF; K_kjG: Xkc5t: goto wWsaN; uGFbD: bPt1R: goto vTm_R; jSfui: goto lKjxC; goto Vjuo3; TMblC: rhSrM: goto cWmx6; q4vvZ: lKjxC: goto rc1Hw; Vjuo3: rdGHb: goto OK6_D; vTm_R: goto Xkc5t; goto SeA3N; OK6_D: echo json_encode($seW3C), "\12";
