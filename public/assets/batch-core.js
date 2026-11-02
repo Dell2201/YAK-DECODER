@@ -5,7 +5,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
   const SIGNATURE = 'Obfuscated by YAK Pro - Php Obfuscator';
-  const LIMITS = {entries: 10000, files: 5000, input: 100 * 1024 * 1024, output: 150 * 1024 * 1024, php: 2 * 1024 * 1024};
+  const LIMITS = {entries: 10000, files: 5000, input: 100 * 1024 * 1024, output: 150 * 1024 * 1024, php: 5 * 1024 * 1024};
   const encoder = new TextEncoder();
 
   function checkCancelled(signal) {
@@ -116,7 +116,7 @@
       if (isPhpPath(entry.path)) {
         if (data.length > LIMITS.php) {
           result.status = 'warning';
-          result.message = 'Больше 2 МБ — сохранён исходник.';
+          result.message = 'Больше 5 МБ — сохранён исходник.';
         } else {
           let text;
           try { text = new TextDecoder('utf-8', {fatal: true}).decode(data); }

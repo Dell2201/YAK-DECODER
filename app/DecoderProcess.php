@@ -16,12 +16,12 @@ final class DecoderProcess
         if (!is_file($binary)) {
             throw new RuntimeException('Не найден PHP CLI. Укажите его путь в YAK_PHP_BINARY.');
         }
-        $command = [$binary, '-n', '-d', 'memory_limit=512M', '-d', 'max_execution_time=20',
+        $command = [$binary, '-n', '-d', 'memory_limit=2G', '-d', 'max_execution_time=20',
             '-d', 'display_errors=stderr', '-d', 'log_errors=0', __DIR__ . '/worker.php'];
         if ($completeFile) {
             $command[] = '--complete-file';
         }
-        $output = $this->runProcess($command, $code, 25, 16777216);
+        $output = $this->runProcess($command, $code, 25, 67108864);
         $result = json_decode($output['stdout'], true);
         if (!is_array($result) || !isset($result['ok'])) {
             throw new RuntimeException('Не хватило ресурсов для обработки кода. Попробуйте меньший фрагмент.');

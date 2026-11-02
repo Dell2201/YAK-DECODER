@@ -14,8 +14,8 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo YAK Decode: http://127.0.0.1:8090
+echo YAK Decode: http://127.0.0.1:18090
 echo Keep this window open. Press Ctrl+C to stop the server.
-start "" "http://127.0.0.1:8090"
-"%YAK_PHP_BINARY%" -n -d display_errors=0 -d memory_limit=256M -S 127.0.0.1:8090 -t public
+start "" "http://127.0.0.1:18090"
+"%YAK_PHP_BINARY%" -n -d display_errors=0 -d memory_limit=256M -d post_max_size=32M -S 127.0.0.1:18090 -t public
 pause
