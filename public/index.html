@@ -18,7 +18,7 @@
         <span class="brand-symbol" aria-hidden="true">Y<span>↗</span></span>
         <span>YAK<span class="brand-light"> / DECODE</span></span>
       </a>
-      <span class="header-tag"><span class="dot"></span> PHP → PHP · Версия 0.30</span>
+      <span class="header-tag"><span class="dot"></span> PHP → PHP · Версия 0.31</span>
     </header>
 
     <main>
@@ -87,7 +87,14 @@
 
       <section class="batch" aria-labelledby="batch-title">
         <div class="batch-heading"><div><p class="eyebrow"><span></span> МОДУЛЬ ЦЕЛИКОМ</p><h2 id="batch-title">Пакетное декодирование папки</h2></div><span class="batch-badge">FOLDER → ZIP</span></div>
-        <p class="batch-description">Перетащите папку модуля OpenCart в область ниже. PHP-файлы будут обработаны рекурсивно, остальные файлы попадут в ZIP без изменений. Названия и вложенность папок сохраняются.</p>
+        <p class="batch-description">Перетащите папку модуля OpenCart в область ниже. Подходящие PHP-файлы будут обработаны рекурсивно, остальные файлы попадут в ZIP без изменений. Названия и вложенность папок, включая пустые папки, сохраняются. Исходная папка на диске не изменяется.</p>
+        <ul class="batch-file-rules">
+          <li>Распознаются расширения <code>.php</code>, <code>.php0</code>–<code>.php9</code>, <code>.phtml</code>, <code>.inc</code> и <code>.tpl</code> без учёта регистра — например, <code>.PHP</code> и <code>.TPL</code> тоже подходят.</li>
+          <li>Для обработки внутри файла нужен открывающий тег <code>&lt;?php</code> или <code>&lt;?=</code>.</li>
+          <li>Смешанный HTML/PHP передаётся декодеру целиком — например, <code>&lt;p&gt;&lt;?php echo $x; ?&gt;&lt;/p&gt;</code>.</li>
+          <li>Файлы <code>.tpl</code> без PHP-тегов копируются без изменений. Синтаксис Smarty или Twig не декодируется.</li>
+          <li>Файлы только с коротким тегом <code>&lt;?</code> не обрабатываются и копируются без изменений.</li>
+        </ul>
         <p class="batch-policy" id="batch-policy">Используется флажок «Обрабатывать только код с подписью YAK Pro» над редактором.</p>
         <div class="batch-dropzone" id="batch-dropzone" aria-label="Зона перетаскивания папки">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a1 1 0 011-1h5l2 3h9a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/><path d="M8 13h8M12 9v8"/></svg>

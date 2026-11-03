@@ -22,3 +22,5 @@
 .yak-version{font-size:14px;color:#667085;margin:10px 0 0}.yak-version a{color:#008f86;font-weight:600;text-decoration:none}.yak-version a:hover{text-decoration:underline}
 
 .php-version-option{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin:0 0 20px;color:#344054;font-size:16px}.php-version-option label{font-weight:600}.php-version-option select{font:inherit;color:#101828;background:#fff;border:1px solid #d9e1ec;border-radius:7px;padding:9px 12px}.php-version-option span{flex-basis:100%;font-size:13px;color:#667085}.php-version-option select:focus-visible{outline:3px solid #5cd6cc;outline-offset:2px}
+
+.batch-file-rules{margin:0 0 16px;padding-left:20px;color:#667085;font-size:12px;line-height:0.75}.batch-file-rules li+li{margin-top:5px}.batch-file-rules code{font-family:var(--mono);font-size:.95em;color:#344054;overflow-wrap:anywhere}@media(max-width:760px){.batch-file-rules{font-size:12px}}
