@@ -3,17 +3,6 @@
 ini_set('display_errors', 'stderr');
 require dirname(__DIR__) . '/lib/decoder/Deobfuscator.php';
 
-function countGotos(string $code): int
-{
-    $count = 0;
-    foreach (token_get_all($code) as $token) {
-        if (is_array($token) && $token[0] === T_GOTO) {
-            $count++;
-        }
-    }
-    return $count;
-}
-
 try {
     $code = stream_get_contents(STDIN, 5242881);
     if ($code === false || strlen($code) > 5242880) {
@@ -27,10 +16,16 @@ try {
     if (!$completeFile && strncasecmp($start, '<?php', 5) !== 0 && strncmp($start, '<?=', 3) !== 0) {
         $code = "<?php\n" . $code;
     }
-    $decoder = new Deobfuscator();
+    $phpVersion = '7.4';
+    foreach (array_slice($argv, 1) as $argument) {
+        if (strpos($argument, '--php-version=') === 0) {
+            $phpVersion = substr($argument, strlen('--php-version='));
+        }
+    }
+    $decoder = new Deobfuscator($phpVersion);
     $decoded = $decoder->processFile($code);
     $result = ['ok' => true, 'code' => $decoded,
-        'gotoBefore' => countGotos($code), 'gotoAfter' => countGotos($decoded)];
+        'gotoBefore' => $decoder->gotoBefore, 'gotoAfter' => $decoder->gotoAfter];
 } catch (PhpParser\Error $error) {
     $result = ['ok' => false, 'status' => 422,
         'error' => 'Ошибка синтаксиса PHP: ' . $error->getMessage()];

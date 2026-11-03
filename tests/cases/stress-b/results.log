@@ -1,0 +1,90 @@
+PHP 7.4: 25 files, 175 comparisons, 0 partial
+PHP 8.1: 25 files, 175 comparisons, 0 partial
+PHP 8.2: 25 files, 175 comparisons, 0 partial
+PHP 8.3: 25 files, 175 comparisons, 0 partial
+{
+  "7.4": {
+    "files": 25,
+    "partial": 0,
+    "gotoBefore": 2550,
+    "gotoAfter": 0,
+    "comparisons": 175,
+    "counterMismatches": 0,
+    "coverage": [
+      "closure.add",
+      "closure.break",
+      "gen.early",
+      "gen.even",
+      "gen.finally",
+      "gen.normal",
+      "gen.odd",
+      "tx.abort",
+      "tx.apply",
+      "tx.catch",
+      "tx.finally",
+      "tx.record",
+      "tx.rollback",
+      "tx.skip",
+      "tx.subtract"
+    ]
+  },
+  "8.1": {
+    "files": 25,
+    "partial": 0,
+    "gotoBefore": 1700,
+    "gotoAfter": 0,
+    "comparisons": 175,
+    "counterMismatches": 0,
+    "coverage": [
+      "fiber.early",
+      "fiber.finally",
+      "fiber.resume",
+      "never.throw",
+      "state.active",
+      "state.catch",
+      "state.closed",
+      "state.finally",
+      "state.start"
+    ]
+  },
+  "8.2": {
+    "files": 25,
+    "partial": 0,
+    "gotoBefore": 1700,
+    "gotoAfter": 0,
+    "comparisons": 175,
+    "counterMismatches": 0,
+    "coverage": [
+      "graph.cycle",
+      "graph.finally",
+      "graph.missing",
+      "graph.negative",
+      "graph.visit",
+      "nest.break3",
+      "nest.continue3",
+      "nest.default",
+      "nest.finally"
+    ]
+  },
+  "8.3": {
+    "files": 25,
+    "partial": 0,
+    "gotoBefore": 2100,
+    "gotoAfter": 0,
+    "comparisons": 175,
+    "counterMismatches": 0,
+    "coverage": [
+      "clone.finally",
+      "clone.skip",
+      "clone.stop",
+      "clone.yield",
+      "retry.break2",
+      "retry.catch",
+      "retry.continue2",
+      "retry.finally",
+      "retry.success",
+      "retry.throw"
+    ]
+  }
+}
+All behavior, lint, zero-goto and goto-counter checks passed.

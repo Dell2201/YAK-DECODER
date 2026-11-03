@@ -2,7 +2,7 @@
 
 final class DecoderProcess
 {
-    public function decode(string $code, bool $completeFile = false): array
+    public function decode(string $code, bool $completeFile = false, string $phpVersion = '7.4'): array
     {
         if (!function_exists('proc_open')) {
             throw new RuntimeException('На сервере необходимо разрешить функцию proc_open.');
@@ -16,8 +16,17 @@ final class DecoderProcess
         if (!is_file($binary)) {
             throw new RuntimeException('Не найден PHP CLI. Укажите его путь в YAK_PHP_BINARY.');
         }
+        $syntaxPaths = ['7.4' => 'php', '8.1' => 'php81', '8.2' => 'php82', '8.3' => 'php83'];
+        if (!isset($syntaxPaths[$phpVersion])) {
+            throw new RuntimeException('Недопустимая версия PHP для проверки синтаксиса.');
+        }
+        $syntaxBinary = dirname(__DIR__) . '/runtime/' . $syntaxPaths[$phpVersion] . '/php.exe';
+        if (!is_file($syntaxBinary)) {
+            throw new RuntimeException('Не найден комплект PHP ' . $phpVersion . ' для проверки синтаксиса.');
+        }
         $command = [$binary, '-n', '-d', 'memory_limit=2G', '-d', 'max_execution_time=20',
             '-d', 'display_errors=stderr', '-d', 'log_errors=0', __DIR__ . '/worker.php'];
+        $command[] = '--php-version=' . $phpVersion;
         if ($completeFile) {
             $command[] = '--complete-file';
         }
@@ -30,12 +39,13 @@ final class DecoderProcess
             return $result;
         }
 
-        $diagnostic = $this->checkSyntax($binary, $result['code']);
+        $diagnostic = $this->checkSyntax($syntaxBinary, $result['code']);
         if ($diagnostic !== '') {
             return ['ok' => false, 'status' => 422,
-                'error' => 'Выходной код не прошёл php --syntax-check. Исходный код сохранён. ' . $diagnostic];
+                'error' => 'Выходной код не прошёл php --syntax-check (PHP ' . $phpVersion . '). Исходный код сохранён. ' . $diagnostic];
         }
         $result['syntaxChecked'] = true;
+        $result['syntaxPhpVersion'] = $phpVersion;
         return $result;
     }
 

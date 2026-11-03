@@ -43,6 +43,10 @@ if (array_key_exists('requireYakSignature', $input) && !is_bool($input['requireY
 if (array_key_exists('completeFile', $input) && !is_bool($input['completeFile'])) {
     respond(['ok' => false, 'error' => 'Параметр обработки полного файла должен быть логическим значением.'], 400);
 }
+$phpVersion = array_key_exists('phpVersion', $input) ? $input['phpVersion'] : '7.4';
+if (!is_string($phpVersion) || !in_array($phpVersion, ['7.4', '8.1', '8.2', '8.3'], true)) {
+    respond(['ok' => false, 'error' => 'Выберите допустимую версию PHP: 7.4, 8.1, 8.2 или 8.3.'], 400);
+}
 $requireYakSignature = $input['requireYakSignature'] ?? false;
 $yakSignature = 'Obfuscated by YAK Pro - Php Obfuscator';
 if ($requireYakSignature && strpos($code, $yakSignature) === false) {
@@ -52,7 +56,7 @@ if ($requireYakSignature && strpos($code, $yakSignature) === false) {
 try {
     require dirname(__DIR__) . '/app/DecoderProcess.php';
     $decoder = new DecoderProcess();
-    $result = $decoder->decode($code, $input['completeFile'] ?? false);
+    $result = $decoder->decode($code, $input['completeFile'] ?? false, $phpVersion);
     $status = $result['ok'] ? 200 : ($result['status'] ?? 500);
     unset($result['status']);
     respond($result, $status);

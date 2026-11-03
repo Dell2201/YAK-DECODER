@@ -5,6 +5,7 @@
   const start = document.getElementById('batch-decode');
   const reset = document.getElementById('batch-reset');
   const cancel = document.getElementById('batch-cancel');
+  const phpVersion = document.getElementById('php-version');
   const signature = document.getElementById('require-yak-signature');
   const policy = document.getElementById('batch-policy');
   const status = document.getElementById('batch-status');
@@ -79,6 +80,7 @@
   });
   reset.addEventListener('click', () => setEntries([]));
   cancel.addEventListener('click', () => { if (controller) controller.abort(); });
+  phpVersion.addEventListener('change', () => { clearResult(); if (entries.length) setStatus('Версия PHP изменена. Запустите обработку папки заново.'); });
   signature.addEventListener('change', () => { updatePolicy(); clearResult(); if (entries.length) setStatus('Настройка изменена. Можно запустить обработку папки.'); });
   document.addEventListener('yak:single-busy', event => { singleBusy = !!event.detail; updateControls(); });
 
@@ -90,10 +92,11 @@
     try {
       const response = await fetch('decode.php', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({code: text, requireYakSignature: options.requireYakSignature, completeFile: true}),
+        body: JSON.stringify({code: text, requireYakSignature: options.requireYakSignature, completeFile: true, phpVersion: options.phpVersion}),
         signal: request.signal, cache: 'no-store'
       });
       const data = await response.json();
+      if (data.ok && data.syntaxPhpVersion !== options.phpVersion) throw new Error('Сервер проверил результат другой версией PHP.');
       if (typeof data.ok !== 'boolean') throw new Error('Сервер вернул некорректный ответ.');
       return data;
     } catch (error) {
@@ -124,7 +127,7 @@
     clearResult();
     controller = new AbortController();
     const startedAt = performance.now();
-    const options = {requireYakSignature: signature.checked, signal: controller.signal};
+    const options = {phpVersion: phpVersion.value, requireYakSignature: signature.checked, signal: controller.signal};
     setBusy(true);
     table.hidden = false;
     try {
@@ -139,7 +142,7 @@
       // Let the progress text paint before calculating the archive CRCs.
       await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
       if (controller.signal.aborted) return;
-      const blob = core.buildZip(files);
+      const blob = core.buildZip(files, options);
       objectUrl = URL.createObjectURL(blob);
       download.href = objectUrl;
       download.download = core.archiveName(entries);
@@ -154,6 +157,7 @@
         ['Не обработано — сохранён исходный файл (причина в таблице)', count('warning')],
         ['Ошибка обработки — сохранён исходный файл', errors],
         ['Время обработки', ((performance.now() - startedAt) / 1000).toFixed(1) + ' с'],
+        ['PHP для проверки синтаксиса', options.phpVersion],
         ['Размер ZIP', (blob.size / 1048576).toFixed(2) + ' МБ']
       ];
       summary.replaceChildren();

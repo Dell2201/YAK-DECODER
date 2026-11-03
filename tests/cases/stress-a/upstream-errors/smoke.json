@@ -1,0 +1,47 @@
+[
+  {
+    "php": "8.1",
+    "yakExit": 0,
+    "obfExit": 255,
+    "obfError": "",
+    "decode": {
+      "ok": true,
+      "gotoBefore": 438,
+      "gotoAfter": 31,
+      "syntaxChecked": true,
+      "syntaxPhpVersion": "8.1"
+    },
+    "equal": false,
+    "decodedError": ""
+  },
+  {
+    "php": "8.2",
+    "yakExit": 0,
+    "obfExit": 255,
+    "obfError": "",
+    "decode": {
+      "ok": true,
+      "gotoBefore": 450,
+      "gotoAfter": 0,
+      "syntaxChecked": true,
+      "syntaxPhpVersion": "8.2"
+    },
+    "equal": false,
+    "decodedError": ""
+  },
+  {
+    "php": "8.3",
+    "yakExit": 0,
+    "obfExit": 255,
+    "obfError": "",
+    "decode": {
+      "ok": true,
+      "gotoBefore": 397,
+      "gotoAfter": 36,
+      "syntaxChecked": true,
+      "syntaxPhpVersion": "8.3"
+    },
+    "equal": false,
+    "decodedError": ""
+  }
+]

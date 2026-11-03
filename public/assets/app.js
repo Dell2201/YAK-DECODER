@@ -12,6 +12,7 @@ const status = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const lineNumbers = document.getElementById('line-numbers');
 const metrics = document.getElementById('code-metrics');
+const phpVersion = document.getElementById('php-version');
 const requireYakSignature = document.getElementById('require-yak-signature');
 const yakSignature = 'Obfuscated by YAK Pro - Php Obfuscator';
 const encoder = new TextEncoder();
@@ -47,6 +48,7 @@ function updateBusyControls() {
   clearButton.disabled = locked;
   restoreButton.disabled = locked;
   requireYakSignature.disabled = locked;
+  phpVersion.disabled = locked;
   code.readOnly = busy;
   code.setAttribute('aria-busy', String(busy));
   decodeButton.classList.toggle('loading', busy);
@@ -84,14 +86,14 @@ async function decode() {
     const response = await fetch('decode.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-      body: JSON.stringify({code: submitted, requireYakSignature: requireYakSignature.checked}),
+      body: JSON.stringify({code: submitted, requireYakSignature: requireYakSignature.checked, phpVersion: phpVersion.value}),
       signal: controller.signal,
       cache: 'no-store'
     });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || 'Не удалось декодировать код.');
     if (typeof data.code !== 'string') throw new Error('Сервер вернул некорректный ответ.');
-    if (data.syntaxChecked !== true) throw new Error('Результат не прошёл обязательную проверку синтаксиса.');
+    if (data.syntaxChecked !== true || data.syntaxPhpVersion !== phpVersion.value) throw new Error('Результат не прошёл обязательную проверку синтаксиса.');
     original = submitted;
     code.value = data.code;
     code.scrollTop = 0;
@@ -100,11 +102,11 @@ async function decode() {
     restoreButton.hidden = false;
     updateEditor();
     if (data.gotoAfter > 0) {
-      setStatus(`Синтаксис проверен. Осталось goto: ${data.gotoAfter}. Часть структуры не удалось восстановить.`, 'warning');
+      setStatus(`Синтаксис проверен: PHP ${data.syntaxPhpVersion}. Осталось goto: ${data.gotoAfter}. Часть структуры не удалось восстановить.`, 'warning');
     } else if (data.gotoBefore > 0) {
-      setStatus(`Готово. Синтаксис проверен. Все переходы goto удалены: ${data.gotoBefore} → 0.`, 'success');
+      setStatus(`Готово. Синтаксис проверен: PHP ${data.syntaxPhpVersion}. Все переходы goto удалены: ${data.gotoBefore} → 0.`, 'success');
     } else {
-      setStatus('Готово. Синтаксис проверен. Код отформатирован; переходов goto не найдено.', 'success');
+      setStatus(`Готово. Синтаксис проверен: PHP ${data.syntaxPhpVersion}. Код отформатирован; переходов goto не найдено.`, 'success');
     }
   } catch (error) {
     let message = error.name === 'AbortError' ? 'Обработка заняла слишком много времени. Попробуйте меньший фрагмент.' : error.message;

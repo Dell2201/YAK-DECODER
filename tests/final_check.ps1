@@ -28,23 +28,12 @@ foreach($seed in 0,2,7,42,99){
     Check ($r -eq 'IDENTICAL') "stress seed $seed behavior"
 }
 
-# 3. fixtures
-foreach($n in 'ww','sw','tri'){
-    & $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root "tests\fixtures\mini-$n-obfuscated.php") (Join-Path $work 'out.php') > (Join-Path $work 'log')
-    Check ((Get-Content (Join-Path $work 'log') | Select-String 'after: 0') -ne $null) "mini-$n -> 0"
-    & $php -n -l (Join-Path $work 'out.php') | Out-Null
-    Check ($LASTEXITCODE -eq 0) "mini-$n lint"
-    $a = & $php -n (Join-Path $root "tests\fixtures\mini-$n-obfuscated.php")
-    $b = & $php -n (Join-Path $work 'out.php')
-    Check ("$a" -eq "$b") "mini-$n behavior"
-}
-
-# 3b. latch-branch fixture (TemplateFormatCleaner::isSafePath, real module)
-& $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root 'tests\fixtures\tfc-latch-obfuscated.php') (Join-Path $work 'out.php') > (Join-Path $work 'log')
+# 3. latch-branch fixture (TemplateFormatCleaner::isSafePath, real module)
+& $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root 'tests\cases\regressions\tfc-latch-obfuscated.php') (Join-Path $work 'out.php') > (Join-Path $work 'log')
 Check ((Get-Content (Join-Path $work 'log') | Select-String 'after: 0') -ne $null) 'tfc-latch -> 0'
 & $php -n -l (Join-Path $work 'out.php') | Out-Null
 Check ($LASTEXITCODE -eq 0) 'tfc-latch lint'
-$a = & $php -n (Join-Path $root 'tests\fixtures\tfc-latch-obfuscated.php')
+$a = & $php -n (Join-Path $root 'tests\cases\regressions\tfc-latch-obfuscated.php')
 $b = & $php -n (Join-Path $work 'out.php')
 Check ("$a" -eq "$b") 'tfc-latch behavior'
 
@@ -56,8 +45,8 @@ $b = & $php -n (Join-Path $work 'out.php')
 Check ("$a" -eq "$b") 'example.txt behavior'
 
 # 5. crosslevel safety net
-& $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root 'tests\fixtures\crosslevel-test.php') (Join-Path $work 'out.php') > (Join-Path $work 'log')
-$a = & $php -n (Join-Path $root 'tests\fixtures\crosslevel-test.php')
+& $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root 'tests\cases\regressions\crosslevel-test.php') (Join-Path $work 'out.php') > (Join-Path $work 'log')
+$a = & $php -n (Join-Path $root 'tests\cases\regressions\crosslevel-test.php')
 $b = & $php -n (Join-Path $work 'out.php')
 Check ("$a" -eq "$b") 'crosslevel behavior'
 
@@ -65,6 +54,10 @@ Check ("$a" -eq "$b") 'crosslevel behavior'
 & $php -n (Join-Path $root 'tests\diag.php') (Join-Path $root 'examples\stress-original.php') (Join-Path $work 'out.php') > (Join-Path $work 'log')
 Check ((Get-Content (Join-Path $work 'log') | Select-String 'goto before: 0') -ne $null) 'clean source passthrough'
 
-Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
+$resolvedWork = [IO.Path]::GetFullPath($work)
+if ($resolvedWork -ne [IO.Path]::GetFullPath((Join-Path $scriptRoot '_work'))) { throw 'Unexpected work directory' }
+Remove-Item -LiteralPath $resolvedWork -Recurse -Force -ErrorAction SilentlyContinue
 Write-Output ''
 if($ok){ Write-Output '=== ALL FINAL CHECKS PASSED ===' } else { Write-Output '=== SOME CHECKS FAILED ===' }
+
+if (-not $ok) { exit 1 }

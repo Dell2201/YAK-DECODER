@@ -1,0 +1,86 @@
+{
+  "7.4": {
+    "files": 1,
+    "partial": 0,
+    "gotoBefore": 102,
+    "gotoAfter": 0,
+    "comparisons": 7,
+    "counterMismatches": 0,
+    "coverage": [
+      "closure.add",
+      "closure.break",
+      "gen.early",
+      "gen.even",
+      "gen.finally",
+      "gen.normal",
+      "gen.odd",
+      "tx.abort",
+      "tx.apply",
+      "tx.catch",
+      "tx.finally",
+      "tx.record",
+      "tx.rollback",
+      "tx.skip",
+      "tx.subtract"
+    ]
+  },
+  "8.1": {
+    "files": 1,
+    "partial": 0,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "comparisons": 7,
+    "counterMismatches": 0,
+    "coverage": [
+      "fiber.early",
+      "fiber.finally",
+      "fiber.resume",
+      "never.throw",
+      "state.active",
+      "state.catch",
+      "state.closed",
+      "state.finally",
+      "state.start"
+    ]
+  },
+  "8.2": {
+    "files": 1,
+    "partial": 0,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "comparisons": 7,
+    "counterMismatches": 0,
+    "coverage": [
+      "graph.cycle",
+      "graph.finally",
+      "graph.missing",
+      "graph.negative",
+      "graph.visit",
+      "nest.break3",
+      "nest.continue3",
+      "nest.default",
+      "nest.finally"
+    ]
+  },
+  "8.3": {
+    "files": 1,
+    "partial": 0,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "comparisons": 7,
+    "counterMismatches": 0,
+    "coverage": [
+      "clone.finally",
+      "clone.skip",
+      "clone.stop",
+      "clone.yield",
+      "retry.break2",
+      "retry.catch",
+      "retry.continue2",
+      "retry.finally",
+      "retry.success",
+      "retry.throw"
+    ]
+  }
+}
+All behavior, lint, zero-goto and goto-counter checks passed.

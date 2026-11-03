@@ -28,6 +28,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
 use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 use PhpParser\PrettyPrinter\Standard;
 
 class Deobfuscator
@@ -37,11 +38,23 @@ class Deobfuscator
     public $stats = ['converted' => 0, 'kept' => 0];
     public $removedBlocks = [];
     public $trace = [];
+    public $gotoBefore = 0;
+    public $gotoAfter = 0;
     private $ctxStack = [];
     /** @var array[] label scopes of nested bodies kept as-is during a region walk */
     private $scopeStack = [];
     /** true while converting nested bodies before a region emission */
     private $preWalk = false;
+
+    private PhpVersion $targetVersion;
+
+    public function __construct(string $phpVersion = '7.4')
+    {
+        if (!in_array($phpVersion, ['7.4', '8.1', '8.2', '8.3'], true)) {
+            throw new InvalidArgumentException('Unsupported target PHP version.');
+        }
+        $this->targetVersion = PhpVersion::fromString($phpVersion);
+    }
 
     private function ctxDesc($s): string
     {
@@ -59,8 +72,10 @@ class Deobfuscator
 
     public function processFile(string $code): string
     {
-        $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
+        $parser = (new ParserFactory())->createForVersion($this->targetVersion);
         $stmts = $parser->parse($code);
+        $finder = new \PhpParser\NodeFinder();
+        $this->gotoBefore = count($finder->findInstanceOf($stmts, Stmt\Goto_::class));
         $comments = new \PhpParser\NodeTraverser();
         $comments->addVisitor(new class extends \PhpParser\NodeVisitorAbstract {
             public function enterNode(Node $node) {
@@ -72,7 +87,8 @@ class Deobfuscator
         });
         $stmts = $comments->traverse($stmts);
         $stmts = $this->processTopLevel($stmts);
-        $pp = new DeobPrinter();
+        $this->gotoAfter = count($finder->findInstanceOf($stmts, Stmt\Goto_::class));
+        $pp = new DeobPrinter(['phpVersion' => $this->targetVersion]);
         return $pp->prettyPrintFile($stmts);
     }
 
@@ -165,7 +181,7 @@ class Deobfuscator
         }
 
         $auditCount = count($this->removedBlocks);
-        // Retry obfuscated foreach/switch bodies with the loop controls
+        // Retry nested bodies with the loop controls
         // attached during emission; remember bodies that stay obfuscated.
         $this->scopeStack[] = [];
         $result = $this->processNested($result);
@@ -198,7 +214,7 @@ class Deobfuscator
                 $keptScopes
             );
         }
-        $printer = new DeobPrinter();
+        $printer = new DeobPrinter(['phpVersion' => $this->targetVersion]);
         foreach ($st->blocks as $block) {
             if (isset($st->reach[$block->id()])) {
                 continue;
@@ -240,7 +256,7 @@ class Deobfuscator
             if ($value instanceof Expr && !$value instanceof Expr\BooleanNot
                 || $value instanceof Node\Scalar
                 || $value instanceof Node\Name || $value instanceof Node\Identifier
-                || $value instanceof Stmt\Return_ || $value instanceof Stmt\Throw_) {
+                || $value instanceof Stmt\Return_) {
                 $key = $value->getType();
                 $counts[$key] = ($counts[$key] ?? 0) + 1;
             }
@@ -265,13 +281,24 @@ class Deobfuscator
             $this->ctxStack[] = $this->ctxDesc($s);
             try {
                 $controls = $s->getAttribute('deob_controls');
-                if ($controls !== null && $s instanceof Stmt\Foreach_) {
+                if ($controls !== null && ($s instanceof Stmt\Foreach_
+                    || $s instanceof Stmt\For_ || $s instanceof Stmt\While_ || $s instanceof Stmt\Do_)) {
                     $s->stmts = $this->attemptNested($s->stmts, $controls);
                     continue;
                 }
                 if ($controls !== null && $s instanceof Stmt\Switch_) {
                     foreach ($s->cases as $case) {
                         $case->stmts = $this->attemptNested($case->stmts, $controls);
+                    }
+                    continue;
+                }
+                if ($controls !== null && $s instanceof Stmt\TryCatch) {
+                    $s->stmts = $this->attemptNested($s->stmts, $controls);
+                    foreach ($s->catches as $catch) {
+                        $catch->stmts = $this->attemptNested($catch->stmts, $controls);
+                    }
+                    if ($s->finally !== null) {
+                        $s->finally->stmts = $this->attemptNested($s->finally->stmts, $controls);
                     }
                     continue;
                 }
@@ -300,21 +327,9 @@ class Deobfuscator
     /** Remove deob_controls attributes left by earlier region emissions. */
     private function stripStaleControls(array $stmts): void
     {
-        foreach ($this->findForeachSwitch($stmts) as $node) {
+        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($stmts, Node::class) as $node) {
             $node->setAttribute('deob_controls', null);
         }
-    }
-
-    /** @return Stmt\Foreach_[]|Stmt\Switch_[] */
-    private function findForeachSwitch(array $stmts): array
-    {
-        $found = [];
-        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($stmts, Node::class) as $node) {
-            if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_) {
-                $found[] = $node;
-            }
-        }
-        return $found;
     }
 
     /** Attempt a nested body; remember it as a stable label scope when kept. */
@@ -442,7 +457,7 @@ class Deobfuscator
 /** Prints string literals readably while keeping the exact byte value. */
 class DeobPrinter extends Standard
 {
-    protected function pScalar_String(Node\Scalar\String_ $node)
+    protected function pScalar_String(Node\Scalar\String_ $node): string
     {
         $v = $node->value;
         if ($v === '') {

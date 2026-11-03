@@ -20,3 +20,5 @@
 .page-footer a{color:#008f86;text-decoration:none;font-weight:600}.page-footer a:hover{text-decoration:underline}
 
 .yak-version{font-size:14px;color:#667085;margin:10px 0 0}.yak-version a{color:#008f86;font-weight:600;text-decoration:none}.yak-version a:hover{text-decoration:underline}
+
+.php-version-option{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin:0 0 20px;color:#344054;font-size:16px}.php-version-option label{font-weight:600}.php-version-option select{font:inherit;color:#101828;background:#fff;border:1px solid #d9e1ec;border-radius:7px;padding:9px 12px}.php-version-option span{flex-basis:100%;font-size:13px;color:#667085}.php-version-option select:focus-visible{outline:3px solid #5cd6cc;outline-offset:2px}

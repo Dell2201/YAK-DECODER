@@ -6,10 +6,10 @@
   <meta name="description" content="Декодирование PHP-кода, запутанного YAK Pro.">
   <title>YAK Decode — читаемый PHP</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2300a99d'/%3E%3Cpath d='M16 17l16 18 16-18M32 35v14' fill='none' stroke='%23ffffff' stroke-width='6'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/styles.css?v=14">
-  <script src="assets/app.js?v=4" defer></script>
-  <script src="assets/batch-core.js?v=4" defer></script>
-  <script src="assets/batch-ui.js?v=7" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=php-select-1">
+  <script src="assets/app.js?v=php-select-1" defer></script>
+  <script src="assets/batch-core.js?v=php-select-1" defer></script>
+  <script src="assets/batch-ui.js?v=php-select-1" defer></script>
 </head>
 <body>
   <div class="page">
@@ -18,7 +18,7 @@
         <span class="brand-symbol" aria-hidden="true">Y<span>↗</span></span>
         <span>YAK<span class="brand-light"> / DECODE</span></span>
       </a>
-      <span class="header-tag"><span class="dot"></span> PHP → PHP · Версия 0.10</span>
+      <span class="header-tag"><span class="dot"></span> PHP → PHP · Версия 0.30</span>
     </header>
 
     <main>
@@ -27,11 +27,21 @@
           <p class="eyebrow"><span></span> ЧИТАЕМЫЙ КОД. МЕНЬШЕ ШУМА.</p>
           <h1 id="page-title">Разберитесь в коде<span class="title-dot">.</span></h1>
           <p class="description">Вставьте PHP-код, запутанный YAK Pro.<br>Один клик — и результат появится в том же поле.</p>
-          <p class="yak-version">Для кода <a href="https://github.com/pk-fr/yakpro-po/tree/2.x" target="_blank" rel="noopener noreferrer">YAK Pro ветки 2.x</a></p>
+          <p class="yak-version">Для кода <a href="https://github.com/pk-fr/yakpro-po/tree/master" target="_blank" rel="noopener noreferrer">YAK Pro ветки 3.x</a></p>
         </div>
         <div class="intro-symbol" aria-hidden="true"><span>{</span><span class="symbol-line"></span><span>}</span></div>
       </section>
 
+      <div class="php-version-option">
+        <label for="php-version">Версия PHP исходного кода</label>
+        <select id="php-version" aria-describedby="php-version-hint">
+          <option value="7.4">PHP 7.4.33</option>
+          <option value="8.1">PHP 8.1.34</option>
+          <option value="8.2">PHP 8.2.35</option>
+          <option value="8.3">PHP 8.3.36</option>
+        </select>
+        <span id="php-version-hint">Выберите версию PHP, для которой предназначен код. Выбранная версия задаёт правила разбора кода и проверки результата в обоих режимах.</span>
+      </div>
       <div class="processing-options">
         <label class="signature-option" for="require-yak-signature">
           <input type="checkbox" id="require-yak-signature" aria-describedby="signature-hint">

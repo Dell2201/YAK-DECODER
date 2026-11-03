@@ -1,0 +1,527 @@
+[
+  {
+    "php": "8.1",
+    "source": "php81-00.obfuscated.php",
+    "decoded": "php81-00.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-01.obfuscated.php",
+    "decoded": "php81-01.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-02.obfuscated.php",
+    "decoded": "php81-02.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-03.obfuscated.php",
+    "decoded": "php81-03.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-04.obfuscated.php",
+    "decoded": "php81-04.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-05.obfuscated.php",
+    "decoded": "php81-05.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-06.obfuscated.php",
+    "decoded": "php81-06.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-07.obfuscated.php",
+    "decoded": "php81-07.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-08.obfuscated.php",
+    "decoded": "php81-08.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-09.obfuscated.php",
+    "decoded": "php81-09.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-10.obfuscated.php",
+    "decoded": "php81-10.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-11.obfuscated.php",
+    "decoded": "php81-11.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-12.obfuscated.php",
+    "decoded": "php81-12.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-13.obfuscated.php",
+    "decoded": "php81-13.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-14.obfuscated.php",
+    "decoded": "php81-14.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-15.obfuscated.php",
+    "decoded": "php81-15.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-16.obfuscated.php",
+    "decoded": "php81-16.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-17.obfuscated.php",
+    "decoded": "php81-17.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-18.obfuscated.php",
+    "decoded": "php81-18.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-19.obfuscated.php",
+    "decoded": "php81-19.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-20.obfuscated.php",
+    "decoded": "php81-20.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-21.obfuscated.php",
+    "decoded": "php81-21.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-22.obfuscated.php",
+    "decoded": "php81-22.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-23.obfuscated.php",
+    "decoded": "php81-23.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.1",
+    "source": "php81-24.obfuscated.php",
+    "decoded": "php81-24.decoded.php",
+    "gotoBefore": 438,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-00.obfuscated.php",
+    "decoded": "php82-00.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-01.obfuscated.php",
+    "decoded": "php82-01.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-02.obfuscated.php",
+    "decoded": "php82-02.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-03.obfuscated.php",
+    "decoded": "php82-03.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-04.obfuscated.php",
+    "decoded": "php82-04.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-05.obfuscated.php",
+    "decoded": "php82-05.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-06.obfuscated.php",
+    "decoded": "php82-06.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-07.obfuscated.php",
+    "decoded": "php82-07.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-08.obfuscated.php",
+    "decoded": "php82-08.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-09.obfuscated.php",
+    "decoded": "php82-09.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-10.obfuscated.php",
+    "decoded": "php82-10.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-11.obfuscated.php",
+    "decoded": "php82-11.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-12.obfuscated.php",
+    "decoded": "php82-12.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-13.obfuscated.php",
+    "decoded": "php82-13.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-14.obfuscated.php",
+    "decoded": "php82-14.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-15.obfuscated.php",
+    "decoded": "php82-15.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-16.obfuscated.php",
+    "decoded": "php82-16.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-17.obfuscated.php",
+    "decoded": "php82-17.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-18.obfuscated.php",
+    "decoded": "php82-18.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-19.obfuscated.php",
+    "decoded": "php82-19.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-20.obfuscated.php",
+    "decoded": "php82-20.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-21.obfuscated.php",
+    "decoded": "php82-21.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-22.obfuscated.php",
+    "decoded": "php82-22.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-23.obfuscated.php",
+    "decoded": "php82-23.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.2",
+    "source": "php82-24.obfuscated.php",
+    "decoded": "php82-24.decoded.php",
+    "gotoBefore": 450,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-00.obfuscated.php",
+    "decoded": "php83-00.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-01.obfuscated.php",
+    "decoded": "php83-01.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-02.obfuscated.php",
+    "decoded": "php83-02.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-03.obfuscated.php",
+    "decoded": "php83-03.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-04.obfuscated.php",
+    "decoded": "php83-04.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-05.obfuscated.php",
+    "decoded": "php83-05.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-06.obfuscated.php",
+    "decoded": "php83-06.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-07.obfuscated.php",
+    "decoded": "php83-07.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-08.obfuscated.php",
+    "decoded": "php83-08.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-09.obfuscated.php",
+    "decoded": "php83-09.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-10.obfuscated.php",
+    "decoded": "php83-10.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-11.obfuscated.php",
+    "decoded": "php83-11.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-12.obfuscated.php",
+    "decoded": "php83-12.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-13.obfuscated.php",
+    "decoded": "php83-13.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-14.obfuscated.php",
+    "decoded": "php83-14.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-15.obfuscated.php",
+    "decoded": "php83-15.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-16.obfuscated.php",
+    "decoded": "php83-16.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-17.obfuscated.php",
+    "decoded": "php83-17.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-18.obfuscated.php",
+    "decoded": "php83-18.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-19.obfuscated.php",
+    "decoded": "php83-19.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-20.obfuscated.php",
+    "decoded": "php83-20.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-21.obfuscated.php",
+    "decoded": "php83-21.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-22.obfuscated.php",
+    "decoded": "php83-22.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-23.obfuscated.php",
+    "decoded": "php83-23.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  },
+  {
+    "php": "8.3",
+    "source": "php83-24.obfuscated.php",
+    "decoded": "php83-24.decoded.php",
+    "gotoBefore": 397,
+    "gotoAfter": 0
+  }
+]

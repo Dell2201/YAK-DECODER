@@ -129,7 +129,7 @@
             else if (!/<\?(?:php\b|=)/i.test(text)) result.message = 'Файл без PHP-тегов — без изменений.';
             else if (options.requireYakSignature && !text.includes(SIGNATURE)) result.message = 'Нет подписи YAK Pro — без изменений.';
             else {
-              const response = await decode(text, {requireYakSignature: !!options.requireYakSignature, signal: options.signal});
+              const response = await decode(text, {requireYakSignature: !!options.requireYakSignature, signal: options.signal, phpVersion: options.phpVersion});
               checkCancelled(options.signal);
               if (!response.ok || response.syntaxChecked !== true || typeof response.code !== 'string') {
                 result.status = 'error';
@@ -138,8 +138,8 @@
                 result.data = encoder.encode(response.code);
                 result.status = response.gotoAfter > 0 ? 'partial' : 'decoded';
                 result.message = response.gotoAfter > 0
-                  ? `Синтаксис проверен. Осталось goto: ${response.gotoAfter}.`
-                  : `Синтаксис проверен. goto: ${response.gotoBefore} → 0.`;
+                  ? `Синтаксис проверен (PHP ${response.syntaxPhpVersion || options.phpVersion || '7.4'}). Осталось goto: ${response.gotoAfter}.`
+                  : `Синтаксис проверен (PHP ${response.syntaxPhpVersion || options.phpVersion || '7.4'}). goto: ${response.gotoBefore} → 0.`;
               }
             }
           }
@@ -165,7 +165,7 @@
     return (c ^ 0xffffffff) >>> 0;
   }
 
-  function reportEntry(results) {
+  function reportEntry(results, options) {
     const sections = [
       ['partial', 'Остались переходы goto — файл обработан частично'],
       ['warning', 'Не обработано — сохранён исходный файл'],
@@ -175,7 +175,7 @@
     const used = new Set(results.map(file => file.path.replace(/\/$/, '').toLowerCase()));
     let name = 'yak-decoder-report.txt', suffix = 2;
     while (used.has(name.toLowerCase())) name = `yak-decoder-report-${suffix++}.txt`;
-    const lines = ['ОТЧЁТ О ПАКЕТНОМ ДЕКОДИРОВАНИИ', ''];
+    const lines = ['ОТЧЁТ О ПАКЕТНОМ ДЕКОДИРОВАНИИ', 'Версия PHP для проверки синтаксиса: ' + (options.phpVersion || '7.4'), ''];
     for (const [status, title] of sections) {
       const items = results.filter(file => file.status === status);
       lines.push(`${title}: ${items.length}`, '');
@@ -190,8 +190,8 @@
   }
 
   // ZIP STORE: exact bytes, UTF-8 names, directory records, no external libraries.
-  function buildZip(results) {
-    const report = reportEntry(results);
+  function buildZip(results, options = {}) {
+    const report = reportEntry(results, options);
     if (report) results = [...results, report];
     const local = [], central = [], names = new Set();
     let offset = 0, centralSize = 0;
