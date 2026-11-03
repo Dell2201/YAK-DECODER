@@ -265,13 +265,24 @@ class Deobfuscator
             $this->ctxStack[] = $this->ctxDesc($s);
             try {
                 $controls = $s->getAttribute('deob_controls');
-                if ($controls !== null && $s instanceof Stmt\Foreach_) {
+                if ($controls !== null && ($s instanceof Stmt\Foreach_
+                    || $s instanceof Stmt\For_ || $s instanceof Stmt\While_ || $s instanceof Stmt\Do_)) {
                     $s->stmts = $this->attemptNested($s->stmts, $controls);
                     continue;
                 }
                 if ($controls !== null && $s instanceof Stmt\Switch_) {
                     foreach ($s->cases as $case) {
                         $case->stmts = $this->attemptNested($case->stmts, $controls);
+                    }
+                    continue;
+                }
+                if ($controls !== null && $s instanceof Stmt\TryCatch) {
+                    $s->stmts = $this->attemptNested($s->stmts, $controls);
+                    foreach ($s->catches as $catch) {
+                        $catch->stmts = $this->attemptNested($catch->stmts, $controls);
+                    }
+                    if ($s->finally !== null) {
+                        $s->finally->stmts = $this->attemptNested($s->finally->stmts, $controls);
                     }
                     continue;
                 }
@@ -300,21 +311,9 @@ class Deobfuscator
     /** Remove deob_controls attributes left by earlier region emissions. */
     private function stripStaleControls(array $stmts): void
     {
-        foreach ($this->findForeachSwitch($stmts) as $node) {
+        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($stmts, Node::class) as $node) {
             $node->setAttribute('deob_controls', null);
         }
-    }
-
-    /** @return Stmt\Foreach_[]|Stmt\Switch_[] */
-    private function findForeachSwitch(array $stmts): array
-    {
-        $found = [];
-        foreach ((new \PhpParser\NodeFinder())->findInstanceOf($stmts, Node::class) as $node) {
-            if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_) {
-                $found[] = $node;
-            }
-        }
-        return $found;
     }
 
     /** Attempt a nested body; remember it as a stable label scope when kept. */

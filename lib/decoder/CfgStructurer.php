@@ -599,9 +599,9 @@ class CfgStructurer
             $lastStmt = end($cur->stmts);
             foreach ($cur->stmts as $statement) {
                 if ($statement instanceof Stmt\Foreach_ || $statement instanceof Stmt\Switch_) {
-                    $this->attachNativeControls($statement, $cur->succ[0] ?? null, $loop);
+                    $this->attachBodyControls($statement, $cur->succ[0] ?? null, $loop);
                 } else {
-                    $this->attachNestedControls($statement, $cur->succ[0] ?? null, $loop, 0,
+                    $this->attachNestedControls($statement, $cur->succ[0] ?? null, $loop,
                         $statement === $lastStmt);
                 }
                 $out[] = $statement;
@@ -713,8 +713,11 @@ class CfgStructurer
         return [$control['kind'] === 'break' ? new Stmt\Break_($number) : new Stmt\Continue_($number)];
     }
 
-    private function attachNativeControls(Node $statement, $after, ?object $loop, int $bias = 0, bool $allowAfter = true): void
+    private function attachBodyControls(Node $statement, $after, ?object $loop, bool $allowAfter = true): void
     {
+        // try/catch/finally share the surrounding loop depth; unlike loops
+        // and switch, they do not count as a level for break/continue.
+        $ownDepth = $statement instanceof Stmt\TryCatch ? 0 : 1;
         $seen = [];
         while ($after instanceof CfgBlock && !$after->stmts
             && $after->term !== null && $after->term[0] === 'goto'
@@ -728,22 +731,26 @@ class CfgStructurer
         }
         $controls = $this->controls;
         foreach ($controls as &$control) {
-            $control['depth'] += count($contexts) + 1 + $bias;
+            $control['depth'] += count($contexts) + $ownDepth;
         }
         unset($control);
         foreach ($this->labelBlock as $label => $_) {
             $target = $this->target($label);
-            if ($allowAfter && $target === $after) {
-                $controls[$label] = ['kind' => 'break', 'depth' => 1 + $bias];
+            if ($ownDepth && $allowAfter && $target === $after) {
+                $controls[$label] = ['kind' => 'break', 'depth' => 1];
                 continue;
             }
             foreach ($contexts as $level => $context) {
                 if ($target === $context->exit) {
-                    $controls[$label] = ['kind' => 'break', 'depth' => $level + 2 + $bias];
+                    $controls[$label] = ['kind' => 'break', 'depth' => $level + 1 + $ownDepth];
                     break;
                 }
-                if ($target === $context->header) {
-                    $controls[$label] = ['kind' => 'continue', 'depth' => $level + 2 + $bias];
+                // A reconstructed for-loop continues at its increment block.
+                // Nested foreach/switch regions need that target too, including
+                // when they are buried inside try/finally.
+                if ($target === $context->continueBlock
+                    || ($target === $context->header && $context->hasHeaderCond)) {
+                    $controls[$label] = ['kind' => 'continue', 'depth' => $level + 1 + $ownDepth];
                     break;
                 }
             }
@@ -758,15 +765,14 @@ class CfgStructurer
     }
 
     /**
-     * Attach loop controls to foreach/switch statements buried in the
-     * emitted statement's own body (inside if/else/try, not inside another
-     * loop). Their bodies are converted later without the emission context,
-     * so they need the mapping while the label blocks are still known.
-     * $bias counts the enclosing loops crossed on the way down; $tail says
-     * the statement is the last thing that runs on the path to the block
+     * Attach loop controls to nested loops, switch and try/catch/finally.
+     * Each body is converted separately, so it needs the mapping while the
+     * enclosing label blocks are still known. Stop at each body boundary;
+     * its own emission will pass the controls on to deeper statements.
+     * $tail says the statement is the last thing on the path to the block
      * successor, which makes "jump to the block after" a plain break.
      */
-    private function attachNestedControls(Node $node, $after, ?object $loop, int $bias, bool $tail): void
+    private function attachNestedControls(Node $node, $after, ?object $loop, bool $tail): void
     {
         // Jumps never cross function/closure scopes.
         if ($node instanceof Stmt\Function_ || $node instanceof Stmt\ClassMethod
@@ -774,16 +780,15 @@ class CfgStructurer
             || $node instanceof Expr\Closure || $node instanceof Expr\ArrowFunction) {
             return;
         }
-        // Opaque loops own their body conversion (their emission adds the
-        // loop level itself), so do not descend into them.
-        if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_) {
+        // Each owner retries its body with the appropriate loop depth.
+        if ($node instanceof Stmt\Foreach_ || $node instanceof Stmt\Switch_
+            || $node instanceof Stmt\For_ || $node instanceof Stmt\While_
+            || $node instanceof Stmt\Do_ || $node instanceof Stmt\TryCatch) {
             if ($node->getAttribute('deob_controls') === null) {
-                $this->attachNativeControls($node, $after, $loop, $bias, $tail);
+                $this->attachBodyControls($node, $after, $loop, $tail);
             }
             return;
         }
-        $add = ($node instanceof Stmt\While_ || $node instanceof Stmt\For_
-            || $node instanceof Stmt\Do_) ? 1 : 0;
         $tailPass = $node instanceof Stmt\If_ || $node instanceof Stmt\Else_
             || $node instanceof Stmt\ElseIf_;
         foreach ($node->getSubNodeNames() as $name) {
@@ -792,12 +797,12 @@ class CfgStructurer
                 $lastIdx = count($v) - 1;
                 foreach ($v as $i => $child) {
                     if ($child instanceof Node) {
-                        $this->attachNestedControls($child, $after, $loop, $bias + $add,
+                        $this->attachNestedControls($child, $after, $loop,
                             $tail && $tailPass && $i === $lastIdx);
                     }
                 }
             } elseif ($v instanceof Node) {
-                $this->attachNestedControls($v, $after, $loop, $bias + $add,
+                $this->attachNestedControls($v, $after, $loop,
                     $tail && $tailPass);
             }
         }

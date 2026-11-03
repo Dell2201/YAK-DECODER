@@ -12,7 +12,20 @@ manifest = json.loads((OUTPUT / 'manifest.json').read_text(encoding='utf8'))
 for batch in manifest:
     with zipfile.ZipFile(OUTPUT / (batch['name'] + '.zip')) as archive:
         assert archive.testzip() is None
-        assert set(archive.namelist()) == {row['path'] for row in batch['results']}
+        expected = {row['path'] for row in batch['results']}
+        issues = [row for row in batch['results'] if row['status'] in {'partial', 'warning', 'error'}]
+        if issues:
+            used = {path.rstrip('/').lower() for path in expected}
+            report_name, suffix = 'yak-decoder-report.txt', 2
+            while report_name.lower() in used:
+                report_name = f'yak-decoder-report-{suffix}.txt'
+                suffix += 1
+            expected.add(report_name)
+            report = archive.read(report_name).decode('utf-8-sig')
+            assert report.startswith('ОТЧЁТ О ПАКЕТНОМ ДЕКОДИРОВАНИИ')
+            for row in issues:
+                assert row['path'] in report, row
+        assert set(archive.namelist()) == expected
         for row in batch['results']:
             info = archive.getinfo(row['path'])
             assert info.is_dir() == row['directory']

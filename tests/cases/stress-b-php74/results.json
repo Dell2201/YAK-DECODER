@@ -1,0 +1,402 @@
+[
+  {
+    "scenario": "graph-nested",
+    "variant": 0,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 1,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 2,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 3,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 4,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 5,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 6,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 7,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 8,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 9,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 10,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 11,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 12,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 13,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 14,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 15,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 16,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 17,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 18,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 19,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 20,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 21,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 22,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 23,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "graph-nested",
+    "variant": 24,
+    "gotoBefore": 68,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 0,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 1,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 2,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 3,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 4,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 5,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 6,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 7,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 8,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 9,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 10,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 11,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 12,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 13,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 14,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 15,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 16,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 17,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 18,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 19,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 20,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 21,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 22,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 23,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  },
+  {
+    "scenario": "clone-retry",
+    "variant": 24,
+    "gotoBefore": 84,
+    "gotoAfter": 0,
+    "behaviorMismatch": [],
+    "yakDifferences": []
+  }
+]
