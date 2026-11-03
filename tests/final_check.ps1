@@ -1,7 +1,7 @@
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $root = Split-Path -Parent $scriptRoot          # project root (contains lib/, examples/, tests/)
 $localPhp = Join-Path $root 'runtime\php\php.exe'
-if (Test-Path $localPhp) { $php = $localPhp } else { $php = 'C:\Users\Dell\Downloads\Yak-pro\runtime\php\php.exe' }
+if (Test-Path $localPhp) { $php = $localPhp } else { $php = 'php' }
 $work = Join-Path $scriptRoot '_work'
 New-Item -ItemType Directory -Force $work | Out-Null
 $ok = $true

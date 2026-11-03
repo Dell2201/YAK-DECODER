@@ -36,7 +36,7 @@
 
 ## Повторный запуск
 
-Из корня Yak-pro v3:
+Из корня проекта:
 
 ```text
 python tests/php8_stress_test.py

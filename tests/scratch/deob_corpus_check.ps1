@@ -1,10 +1,16 @@
+param(
+    [Parameter(Mandatory = $true)][string]$CorpusRoot,
+    [string]$ProjectRoot
+)
+# Executes the corpus as PHP programs: use authored, safe test fixtures only.
 $ErrorActionPreference = 'Stop'
-$root = 'C:\Users\Dell\Downloads\DEOB'
-$php  = 'C:\Users\Dell\Downloads\Yak-pro v2\runtime\php\php.exe'
-$lib  = 'C:\Users\Dell\AppData\Roaming\AutoClaw-oversea-official\accounts\2e5dcecdcb60e1bb0d5ae031952401806409ff8c815766bcd714534acb6ec6b8\projects\Default\yak-pro'
-if($args.Count -ge 1){ $lib = $args[0] }
-if($args.Count -ge 2){ $root = $args[1] }
-$scratch = 'C:\Users\Dell\AppData\Roaming\AutoClaw-oversea-official\accounts\2e5dcecdcb60e1bb0d5ae031952401806409ff8c815766bcd714534acb6ec6b8\projects\Default\yak-pro\tests\scratch'
+if (-not $ProjectRoot) {
+    $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+}
+$root = (Resolve-Path -LiteralPath $CorpusRoot).Path.TrimEnd('\')
+$lib = (Resolve-Path -LiteralPath $ProjectRoot).Path
+$php = Join-Path $lib 'runtime\php\php.exe'
+$scratch = Join-Path $lib 'tests\scratch'
 $outRoot = Join-Path $env:TEMP 'deob-check'
 New-Item -ItemType Directory -Force -Path $outRoot | Out-Null
 $files = Get-ChildItem $root -Recurse -File -Include *.php,*.php0,*.php1,*.php2,*.php3,*.php4,*.php5,*.php6,*.php7,*.php8,*.php9,*.phtml,*.inc | Sort-Object FullName

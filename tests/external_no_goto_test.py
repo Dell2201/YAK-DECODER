@@ -11,11 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PHP = ROOT / 'runtime/php/php.exe'
 BRIDGE = ROOT / 'tests/decode_version_fixture.php'
 COUNTER = ROOT / 'tests/count_fixture_gotos.php'
-DEFAULTS = [
-    r'C:\Users\Dell\Downloads\DEOB',
-    r'C:\Users\Dell\Downloads\social_login-opencart-2.3-3.x-v4.0.236.ocmod',
-    r'C:\Users\Dell\Downloads\social_login-opencart-2.3-3.x-v4.1.5.ocmod',
-]
+
 
 
 def run(*args):
@@ -50,7 +46,7 @@ def check(root, source):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('folders', nargs='*', default=DEFAULTS)
+    parser.add_argument('folders', nargs='+', help='PHP folders to inspect without executing their code')
     parser.add_argument('--report', type=Path, required=True)
     parser.add_argument('--workers', type=int, default=2)
     args = parser.parse_args()
