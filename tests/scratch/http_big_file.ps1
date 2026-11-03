@@ -4,6 +4,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $php = Join-Path $root 'runtime\php\php.exe'
 $big = (Resolve-Path -LiteralPath $InputFile).Path
+. (Join-Path $root 'tests\native_process.ps1')
 
 # start a test server (same flags as start.cmd)
 $proc = Start-Process -FilePath $php -ArgumentList @('-n','-d','display_errors=0','-d','memory_limit=256M','-d','post_max_size=32M','-S','127.0.0.1:8091','-t',('"' + $root + '\public"')) -PassThru -WindowStyle Hidden
@@ -19,12 +20,13 @@ try {
     Write-Output ("ok: " + $json.ok)
     Write-Output ("syntaxChecked: " + $json.syntaxChecked)
     Write-Output ("gotoBefore: " + $json.gotoBefore + ", gotoAfter: " + $json.gotoAfter)
+    if ($resp.StatusCode -ne 200 -or $json.ok -ne $true -or $json.syntaxChecked -ne $true -or $null -eq $json.gotoAfter -or $json.gotoAfter -ne 0) { throw 'HTTP decode did not produce complete, syntax-checked output' }
     $out = Join-Path $env:TEMP 'yak-http-out.php'
     [IO.File]::WriteAllText($out, $json.code, (New-Object System.Text.UTF8Encoding($false)))
-    & $php -n -l $out
-    $a = & $php -n -d error_reporting=E_ALL -d display_errors=0 $big 2>&1 | Out-String
-    $b = & $php -n -d error_reporting=E_ALL -d display_errors=0 $out 2>&1 | Out-String
-    Write-Output ("behavior identical: " + ($a -eq $b))
+    $lint = Invoke-TestPhp -Php $php -Arguments @('-n', '-l', $out)
+    if ($lint.ExitCode -ne 0) { throw ('Output lint failed: ' + $lint.Output + $lint.Error) }
+    if (-not (Test-FixtureBehavior -Php $php -Before $big -After $out)) { throw 'Behavior mismatch or nonzero exit code' }
+    Write-Output 'PASS HTTP, zero goto, lint and exact behavior comparison'
 } finally {
     if($proc -and -not $proc.HasExited){ Stop-Process -Id $proc.Id -Force }
 }

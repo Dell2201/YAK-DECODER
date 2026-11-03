@@ -78,31 +78,35 @@ async function main() {
   const inputs = core.prepareEntries([...fixtures.map(([name, data]) => ({path: name, file: file(name, data)})), {path: 'Модуль Пример/пустая папка/', directory: true}]);
   const source = new Map(fixtures.map(([name, data]) => [name, Buffer.from(data)]));
   const manifests = [];
-  for (const required of [true, false]) {
-    let calls = 0;
-    const results = await core.decodeEntries(inputs, {requireYakSignature: required}, async (code, options) => {
-      calls++;
-      const response = await fetch(URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code, requireYakSignature: options.requireYakSignature, completeFile: true})});
-      return response.json();
-    });
-    const get = name => results.find(result => result.path.endsWith(name));
-    assert.equal(get('/signed.php').status, 'decoded');
-    assert.equal(get('/plain.php').status, required ? 'kept' : 'decoded');
-    assert.equal(get('/native.tpl').status, required ? 'kept' : 'decoded');
-    assert.equal(get('/broken.php').status, 'error');
-    assert.equal(get('/syntax-error.php').status, 'error');
-    assert.equal(get('/partial.php').status, 'partial');
-    assert.equal(get('/cp1251.inc').status, 'warning');
-    assert.equal(get('/oversize.php').status, 'warning');
-    assert.equal(calls, required ? 4 : 6);
-    for (const result of results) {
-      if (['kept', 'warning', 'error'].includes(result.status)) assert.deepEqual(Buffer.from(result.data), source.get(result.path));
+  for (const phpVersion of ['7.4', '8.1', '8.2', '8.3']) {
+    for (const required of [true, false]) {
+      let calls = 0;
+      const results = await core.decodeEntries(inputs, {requireYakSignature: required, phpVersion}, async (code, options) => {
+        calls++;
+        const response = await fetch(URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code, requireYakSignature: options.requireYakSignature, completeFile: true, phpVersion: options.phpVersion})});
+        const data = await response.json();
+        if (data.ok) assert.equal(data.syntaxPhpVersion, phpVersion);
+        return data;
+      });
+      const get = name => results.find(result => result.path.endsWith(name));
+      assert.equal(get('/signed.php').status, 'decoded');
+      assert.equal(get('/plain.php').status, required ? 'kept' : 'decoded');
+      assert.equal(get('/native.tpl').status, required ? 'kept' : 'decoded');
+      assert.equal(get('/broken.php').status, 'error');
+      assert.equal(get('/syntax-error.php').status, 'error');
+      assert.equal(get('/partial.php').status, 'partial');
+      assert.equal(get('/cp1251.inc').status, 'warning');
+      assert.equal(get('/oversize.php').status, 'warning');
+      assert.equal(calls, required ? 4 : 6);
+      for (const result of results) {
+        if (['kept', 'warning', 'error'].includes(result.status)) assert.deepEqual(Buffer.from(result.data), source.get(result.path));
+      }
+      const zip = core.buildZip(results, {phpVersion});
+      const name = phpVersion + '-' + (required ? 'signed-only' : 'all-php');
+      await fs.writeFile(path.join(OUTPUT, name + '.zip'), Buffer.from(await zip.arrayBuffer()));
+      manifests.push({name, calls, phpVersion, results: results.map(result => ({path: result.path, directory: !!result.directory, status: result.status, message: result.message}))});
+      console.log('PASS real PHP batch; signature filter:', required, '; decoder requests:', calls);
     }
-    const zip = core.buildZip(results);
-    const name = required ? 'signed-only' : 'all-php';
-    await fs.writeFile(path.join(OUTPUT, name + '.zip'), Buffer.from(await zip.arrayBuffer()));
-    manifests.push({name, calls, results: results.map(result => ({path: result.path, directory: !!result.directory, status: result.status, message: result.message}))});
-    console.log('PASS real PHP batch; signature filter:', required, '; decoder requests:', calls);
   }
   await fs.writeFile(path.join(OUTPUT, 'manifest.json'), JSON.stringify(manifests, null, 2));
   await fs.mkdir(path.join(OUTPUT, 'fixture'), {recursive: true});
