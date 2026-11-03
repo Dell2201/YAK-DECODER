@@ -1,4 +1,4 @@
-# YAK Decoder · 0.10
+# YAK Decoder · 0.11
 
 Локальный декодер PHP-кода после [YAK Pro 2.x](https://github.com/pk-fr/yakpro-po/tree/2.x). Восстанавливает условия и циклы из переходов `goto`, раскрывает экранированные строки и форматирует код. Проверен с YAK Pro 2.0.17, PHP 7.4.33 и PHP-Parser 4.19.4.
 
