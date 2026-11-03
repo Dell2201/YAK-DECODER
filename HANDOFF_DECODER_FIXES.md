@@ -1,6 +1,6 @@
 # YAK Decoder 2.x — исправления декодера
 
-Краткое описание текущих механизмов и регрессий. Архитектура — в [PROJECT_HANDOFF.md](PROJECT_HANDOFF.md), запуск проверок — в [README.md](README.md).
+Краткое описание текущих механизмов и регрессий. Архитектура — в [PROJECT_HANDOFF.md](PROJECT_HANDOFF.md), запуск проверок — в [PROJECT_HANDOFF.md](PROJECT_HANDOFF.md#проверки).
 
 ## Восстановление управления потоком
 

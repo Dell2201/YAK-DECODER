@@ -48,25 +48,4 @@ PHP и необходимые DLL входят в комплект. Для ра�
 
 DocumentRoot должен указывать на `public/`; нужны PHP CLI, разрешённый `proc_open` и возможность создавать временные файлы. На Windows встроенный `runtime/php/php.exe` имеет приоритет. Иначе CLI выбирается через `YAK_PHP_BINARY`, затем `PHP_BINDIR`. Совместимость с другим runtime проверяйте отдельно. Процессы запускаются с `-n`, без системного `php.ini`.
 
-## Проверки разработки
-
-Команды выполняются из корня проекта. Для Python-проверок нужен Python, для пакетных — Node.js.
-
-```text
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/final_check.ps1
-python tests/portable_runtime_test.py
-python tests/cases/stress-b-php74/run_tests.py
-```
-
-Первая команда проверяет базовые регрессии, вторая сама запускает и останавливает сервер, третья проверяет сохранённые 50 стресс-вариантов. Для создания свежих обфускаций у третьей команды есть параметр `--yakpro ПУТЬ/К/yakpro-po.php` (нужен YAK Pro 2.x).
-
-Для проверки пакетного режима сначала запустите сайт через `start.cmd`, затем:
-
-```text
-node tests/batch_test.js "%TEMP%/yak-batch-check"
-python tests/verify_batch_zip.py "%TEMP%/yak-batch-check"
-```
-
-Стресс-проверки исполняют только специально подготовленные тестовые программы. Сайт пользовательский PHP не исполняет.
-
 [Устройство и правила доработки](PROJECT_HANDOFF.md) · [Исправления декодера](HANDOFF_DECODER_FIXES.md) · [Лимиты](LIMITS.txt)
